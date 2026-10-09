@@ -75,6 +75,8 @@ textarea { resize: vertical; min-height: 60px; width: 100%; }
 .kpi .v small { font-size: .8rem; color: var(--muted); }
 .kpi .d { font-size: .75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kpi .meter { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.click-kpi { cursor: pointer; }
+.click-kpi:hover { border-color: var(--line-2); }
 .kpi .meter i { display: block; height: 100%; background: var(--accent); }
 .grid2 { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; }
 @media (max-width: 900px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
@@ -144,6 +146,46 @@ td.best { color: var(--accent); font-weight: 600; }
 .stat-grid b { direction: ltr; unicode-bidi: isolate; text-align: right; font-family: var(--mono); font-size: 1.05rem; font-weight: 500; font-variant-numeric: tabular-nums; }
 .stat-grid .d { font-size: .7rem; color: var(--muted); }
 
+/* Expenses */
+.m-label { min-width: 120px; text-align: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-btn { background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 10px; font-size: .78rem; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.chip-btn b { font-family: var(--mono); font-weight: 500; color: var(--accent); }
+.chip-btn:hover { border-color: var(--accent); }
+details.grp { border-bottom: 1px solid var(--line); }
+details.grp:last-child { border-bottom: 0; }
+details.grp > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; }
+details.grp > summary::-webkit-details-marker { display: none; }
+details.grp > summary .nm { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+details.grp > summary .nm::before { content: "‹"; display: inline-block; color: var(--muted); transition: transform .15s; font-size: 1.1rem; line-height: 1; }
+details.grp[open] > summary .nm::before { transform: rotate(-90deg); }
+details.grp > summary .amt { font-family: var(--mono); font-variant-numeric: tabular-nums; direction: ltr; }
+details.grp > summary .bar { grid-column: 1 / -1; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+details.grp > summary .bar i { display: block; height: 100%; }
+.subs { padding: 0 14px 12px; display: grid; gap: 8px; }
+.sub { background: var(--panel-2); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; }
+.sub-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sub-h .amt { font-family: var(--mono); direction: ltr; }
+.sub-list { display: grid; gap: 2px; font-size: .82rem; }
+.sub-list div { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px; align-items: center; padding: 3px 0; border-top: 1px dashed var(--line); }
+.sub-list .dt { font-family: var(--mono); color: var(--faint); font-size: .72rem; direction: ltr; }
+.sub-list .a { font-family: var(--mono); direction: ltr; }
+.x-del { background: none; border: 0; color: var(--faint); cursor: pointer; font-size: 1rem; padding: 0 4px; }
+.x-del:hover { color: var(--bad); }
+.add-sub { display: flex; gap: 6px; }
+.add-sub input { flex: 1; }
+.dh { font-size: .72rem; color: var(--muted); }
+/* Bills */
+.due-list { display: grid; gap: 0; }
+.due-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); align-items: center; }
+.due-row:last-child { border-bottom: 0; }
+.due-row .t { font-weight: 600; }
+.due-row .s { font-size: .76rem; color: var(--muted); }
+.due-row .r { display: flex; gap: 6px; align-items: center; grid-row: span 2; }
+.due-row .a { font-family: var(--mono); direction: ltr; }
+.due-row.late { border-inline-start: 3px solid var(--bad); }
+.due-row.soon { border-inline-start: 3px solid var(--warn); }
+
 /* Facts (supplement detail) */
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
 .fact { border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 4px; min-width: 0; }
@@ -196,6 +238,8 @@ td.best { color: var(--accent); font-weight: 600; }
   <button class="nav" data-tab="home"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>لوحة القيادة</button>
   <div class="sec">التنظيم</div>
   <button class="nav" data-tab="cal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>الأجندة<span class="badge" id="nb-cal"></span></button>
+  <button class="nav" data-tab="exp"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>المصاريف</button>
+  <button class="nav" data-tab="bills"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>الالتزامات<span class="badge" id="nb-bills"></span></button>
   <div class="sec">المعطيات</div>
   <button class="nav" data-tab="min"><svg viewBox="0 0 24 24"><path d="M12 2l8 5v10l-8 5-8-5V7z"/><path d="M12 22V12M20 7l-8 5-8-5"/></svg>المعادن<span class="badge">13</span></button>
   <button class="nav" data-tab="sup"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9.2 9.2l5.6 5.6"/></svg>المكملات<span class="badge">8</span></button>
@@ -215,6 +259,8 @@ td.best { color: var(--accent); font-weight: 600; }
 
   <!-- لوحة القيادة -->
   <section class="page view" id="v-home">
+    <div class="panel" id="home-bills" hidden><header><h2>مدفوعات قريبة</h2><button class="btn" data-go="bills">كل الالتزامات</button></header>
+      <div class="due-list" id="home-bills-list"></div></div>
     <div class="panel" id="prof-panel"><header><h2>معطياتي</h2><span class="lbl" id="prof-saved"></span></header>
       <div class="prof">
         <form class="prof-form" id="prof-form" novalidate>
@@ -240,7 +286,7 @@ td.best { color: var(--accent); font-weight: 600; }
       <div class="kpi"><span class="lbl">مواعيد اليوم</span><span class="v" id="k-count">0</span><span class="d" id="k-next">لا توجد مواعيد</span></div>
       <div class="kpi"><span class="lbl">الوقت المخطط اليوم</span><span class="v" id="k-hours">0<small> س</small></span><div class="meter"><i id="k-hours-m" style="width:0"></i></div></div>
       <div class="kpi"><span class="lbl">منبهات مفعّلة</span><span class="v" id="k-alarms">0</span><span class="d">ترنّ عندما تكون الصفحة مفتوحة</span></div>
-      <div class="kpi"><span class="lbl">المعطيات</span><span class="v">21</span><span class="d">13 معدنًا · 8 مكملات</span></div>
+      <div class="kpi click-kpi" data-go="exp"><span class="lbl">مصاريف هذا الشهر</span><span class="v" id="k-exp">0</span><span class="d" id="k-exp-d">درهم</span></div>
     </div>
     <div class="grid2">
       <div class="panel"><header><h2>الوقت المخطط في الأسبوع</h2><span class="lbl" id="wk-range"></span></header>
@@ -248,6 +294,8 @@ td.best { color: var(--accent); font-weight: 600; }
       <div class="panel"><header><h2>برنامج اليوم</h2><button class="btn" data-go="cal">فتح الأجندة</button></header>
         <div class="body flush tw"><table><thead><tr><th>الوقت</th><th>النشاط</th><th>منبه</th></tr></thead><tbody id="home-today"></tbody></table></div></div>
     </div>
+    <div class="panel"><header><h2>مصاريف هذا الشهر حسب الفئة</h2><button class="btn" data-go="exp">التفاصيل</button></header>
+      <div class="body" id="home-exp"></div></div>
     <p class="note">القيم للبالغين حسب NIH. المنتجات والأسعار في صفحة المقارنة افتراضية (EXEMPLE).</p>
   </section>
 
@@ -299,6 +347,82 @@ td.best { color: var(--accent); font-weight: 600; }
         </div></div>
     </div>
     <p class="note" id="alarm-note">يرنّ المنبه ويظهر في الأعلى عندما تكون الصفحة مفتوحة. في تطبيق Android يرنّ حتى لو كان التطبيق مغلقًا.</p>
+  </section>
+
+  <!-- المصاريف -->
+  <section class="page view" id="v-exp" hidden>
+    <div class="filters">
+      <button class="icon-btn" id="m-prev" aria-label="الشهر السابق">›</button>
+      <strong id="m-label" class="m-label"></strong>
+      <button class="icon-btn" id="m-next" aria-label="الشهر التالي">‹</button>
+      <button class="btn" id="m-now">هذا الشهر</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span class="lbl">مجموع الشهر</span><span class="v" id="x-total">0</span><span class="d" id="x-count"></span></div>
+      <div class="kpi"><span class="lbl">الشهر السابق</span><span class="v" id="x-prev">0</span><span class="d" id="x-diff"></span></div>
+      <div class="kpi"><span class="lbl">المعدل اليومي</span><span class="v" id="x-avg">0</span><span class="d">في هذا الشهر</span></div>
+      <div class="kpi"><span class="lbl">أكبر فئة</span><span class="v" id="x-top" style="font-family:var(--body);font-size:1.1rem">—</span><span class="d" id="x-top-d"></span></div>
+    </div>
+    <div class="panel" id="x-panel"><header><h2 id="x-form-title">إضافة مصروف</h2></header>
+      <div class="body">
+        <form class="form" id="x-form" novalidate>
+          <div class="two">
+            <label>الفئة<select id="x-sub"></select></label>
+            <label>التاريخ<input type="date" id="x-date"></label>
+          </div>
+          <div class="two">
+            <label>المادة<input type="text" id="x-item" list="x-items" placeholder="مثال: طماطم" maxlength="60"></label>
+            <label>المبلغ (درهم)<input type="text" inputmode="decimal" id="x-amount" placeholder="0"></label>
+          </div>
+          <datalist id="x-items"></datalist>
+          <div class="chips" id="x-again"></div>
+          <label>ملاحظة<input type="text" id="x-note" placeholder="اختياري" maxlength="80"></label>
+          <ul class="errs" id="x-errs"></ul>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" class="btn pri">إضافة</button></div>
+        </form>
+      </div>
+    </div>
+    <div class="panel"><header><h2>المصاريف حسب الفئة</h2><span class="lbl" id="x-sum-lbl"></span></header>
+      <div class="body flush" id="x-groups"></div></div>
+    <p class="note">تُحفظ المصاريف في الهاتف فقط. يمكنك إضافة فئات خاصة بك داخل كل مجموعة.</p>
+  </section>
+
+  <!-- الالتزامات -->
+  <section class="page view" id="v-bills" hidden>
+    <div class="kpis">
+      <div class="kpi"><span class="lbl">الالتزامات</span><span class="v" id="b-count">0</span><span class="d" id="b-monthly"></span></div>
+      <div class="kpi"><span class="lbl">قريبة الاستحقاق</span><span class="v" id="b-soon">0</span><span class="d">داخل الهامش</span></div>
+      <div class="kpi"><span class="lbl">متأخرة</span><span class="v" id="b-late">0</span><span class="d">لم تُدفع بعد</span></div>
+      <div class="kpi"><span class="lbl">مستحق خلال 30 يومًا</span><span class="v" id="b-30">0</span><span class="d">درهم</span></div>
+    </div>
+    <div class="panel"><header><h2>قائمة الالتزامات</h2><span class="lbl">مرتبة حسب أقرب استحقاق</span></header>
+      <div class="body flush tw"><table><thead><tr><th>الالتزام</th><th>المبلغ</th><th>الاستحقاق</th><th>الحالة</th><th></th></tr></thead><tbody id="b-table"></tbody></table></div></div>
+    <div class="panel" id="b-panel"><header><h2 id="b-form-title">التزام جديد</h2></header>
+      <div class="body">
+        <form class="form" id="b-form" novalidate>
+          <div class="two">
+            <label>الاسم<input type="text" id="b-name" placeholder="مثال: تأمين السيارة، كراء، تكوين" maxlength="60"></label>
+            <label>المبلغ (درهم)<input type="text" inputmode="decimal" id="b-amount" placeholder="0"></label>
+          </div>
+          <div class="two">
+            <label>الدورية<select id="b-freq"><option value="monthly">شهري</option><option value="yearly">سنوي</option><option value="once">مرة واحدة</option></select></label>
+            <label id="b-day-l">يوم الاستحقاق من كل شهر<input type="number" inputmode="numeric" id="b-day" min="1" max="31" value="1"></label>
+            <label id="b-date-l" hidden>تاريخ الاستحقاق<input type="date" id="b-date"></label>
+          </div>
+          <div class="two">
+            <label>التنبيه قبل (أيام)<input type="number" inputmode="numeric" id="b-margin" min="0" max="60" value="3"></label>
+            <label>فئة المصروف<select id="b-sub"></select></label>
+          </div>
+          <ul class="errs" id="b-errs"></ul>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="submit" class="btn pri" id="b-save">إضافة</button>
+            <button type="button" class="btn" id="b-cancel">إلغاء</button>
+            <button type="button" class="btn danger" id="b-del" hidden>حذف</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <p class="note" id="b-note">يظهر الالتزام في لوحة القيادة عندما يدخل في هامش التنبيه أو يتأخر. عند الضغط على «تم الدفع» يُسجَّل المبلغ في المصاريف تلقائيًا.</p>
   </section>
 
   <!-- المعادن -->
@@ -366,7 +490,7 @@ td.best { color: var(--accent); font-weight: 600; }
   const ul = (a) => a && a.length ? `<ul>${a.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<span class="muted">لا شيء مسجل</span>`;
 
   // ---------- Navigation
-  const TITLES = { home: ["Dashboard", "لوحة القيادة"], cal: ["Agenda", "الأجندة"], min: ["Minéraux", "المعادن"], sup: ["Suppléments", "المكملات"], cmp: ["Comparaison", "مقارنة المنتجات"], src: ["Sources", "المصادر"] };
+  const TITLES = { home: ["Dashboard", "لوحة القيادة"], cal: ["Agenda", "الأجندة"], exp: ["Dépenses", "المصاريف"], bills: ["Échéances", "الالتزامات"], min: ["Minéraux", "المعادن"], sup: ["Suppléments", "المكملات"], cmp: ["Comparaison", "مقارنة المنتجات"], src: ["Sources", "المصادر"] };
   function setDrawer(o) { $("#side").classList.toggle("open", o); $("#scrim").hidden = !o; $("#menu").setAttribute("aria-expanded", o); }
   $("#menu").addEventListener("click", () => setDrawer(true));
   $("#scrim").addEventListener("click", () => setDrawer(false));
@@ -465,6 +589,7 @@ td.best { color: var(--accent); font-weight: 600; }
         let p = await LN.checkPermissions();
         if (p.display !== "granted") p = await LN.requestPermissions();
         if (p.display !== "granted") { $("#savestate").textContent = "المنبهات معطّلة: فعّل الإشعارات من الإعدادات"; return false; }
+        try { await LN.createChannel({ id: "bills", name: "الالتزامات والمدفوعات", description: "تذكير بمواعيد الدفع", importance: 4, visibility: 1, vibration: true }); } catch (e) {}
         try { await LN.createChannel({ id: "alarms", name: "المنبهات · نغمة الهاتف", description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80" }); } catch (e) {}
         for (const t of TONES) if (t.id !== "default") { try { await LN.createChannel({ id: "alarm_" + t.id, name: "المنبهات · " + t.ar, description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80", sound: "tone_" + t.id + ".wav" }); } catch (e) {} }
         try { await LN.registerActionTypes({ types: [{ id: "ALARM", actions: [{ id: "snooze", title: `تذكير بعد ${SNOOZE_MIN} دقائق` }, { id: "stop", title: "إيقاف", destructive: true }] }] }); } catch (e) {}
@@ -838,6 +963,215 @@ td.best { color: var(--accent); font-weight: 600; }
     $$("#cmp tbody th").forEach((th) => { th.style.color = "var(--muted)"; th.style.fontWeight = "500"; th.style.background = "var(--panel-2)"; th.style.fontSize = ".8rem"; });
   }
 
+  // ---------- Expenses (stored on this device)
+  const EXP_TREE_BASE = [
+    { id: "home", ar: "السكن", subs: [["rent", "الكراء"], ["utilities", "الماء والكهرباء"], ["internet", "الإنترنت والهاتف"]] },
+    { id: "subs", ar: "الاشتراكات", subs: [["gym", "القاعة الرياضية"], ["apps", "اشتراكات رقمية"], ["sub_other", "اشتراكات أخرى"]] },
+    { id: "food", ar: "التغذية", subs: [["veg", "الخضر"], ["fruit", "الفواكه"], ["meat", "اللحوم والدواجن والأسماك"], ["dairy", "الحليب ومشتقاته والبيض"], ["bread", "الخبز والحبوب"], ["grocery", "البقالة"], ["out", "الأكل خارج المنزل"]] },
+    { id: "health", ar: "الصحة", subs: [["doctor", "الطبيب"], ["pharmacy", "الصيدلية والأدوية"], ["lab", "التحاليل"], ["supp", "المكملات الغذائية"]] },
+    { id: "care", ar: "العناية الشخصية", subs: [["barber", "الحلاق"], ["hygiene", "منتجات النظافة والعناية"]] },
+    { id: "edu", ar: "التكوين والتعليم", subs: [["course", "الدورات التكوينية"], ["books", "الكتب"]] },
+    { id: "transport", ar: "النقل", subs: [["fuel", "الوقود"], ["taxi", "النقل العمومي وسيارات الأجرة"], ["car", "صيانة السيارة"]] },
+    { id: "insurance", ar: "التأمين", subs: [["ins_health", "التأمين الصحي"], ["ins_car", "تأمين السيارة"], ["ins_other", "تأمينات أخرى"]] },
+    { id: "other", ar: "أخرى", subs: [["clothes", "الملابس"], ["fun", "الترفيه"], ["misc", "متفرقات"]] },
+  ];
+  const GCOL = ["var(--c1)", "var(--c2)", "var(--c3)", "var(--c4)", "var(--c5)", "var(--c6)", "#94A3B8", "#F59E0B", "#38BDF8"];
+  const jget = (k, d) => { try { return JSON.parse(store.get(k) || "null") ?? d; } catch (e) { return d; } };
+  let expenses = jget("exp-list", []);
+  let customSubs = jget("exp-custom", []); // [{id, group, ar}]
+  const saveExp = () => store.set("exp-list", JSON.stringify(expenses));
+  function expTree() {
+    return EXP_TREE_BASE.map((g, i) => ({ id: g.id, ar: g.ar, col: GCOL[i % GCOL.length], subs: g.subs.map(([id, ar]) => ({ id, ar })).concat(customSubs.filter((c) => c.group === g.id).map((c) => ({ id: c.id, ar: c.ar, custom: true }))) }));
+  }
+  const subName = (id) => { for (const g of expTree()) for (const s of g.subs) if (s.id === id) return s.ar; return "—"; };
+  const fmtDH = (n) => { const v = Math.round((Number(n) || 0) * 100) / 100; const [i, d] = v.toFixed(2).split("."); return "\u2066" + i.replace(/\B(?=(\d{3})+(?!\d))/g, "\u202F") + (d !== "00" ? "," + d : "") + "\u2069"; };
+  const thisMonth = () => today().slice(0, 7);
+  const monthName = (m) => { const [y, mm] = m.split("-").map(Number); return `${MONTHS[mm - 1]} ${y}`; };
+  let xMonth = thisMonth();
+  const openGroups = new Set(jget("exp-open", []));
+  function fillSubSelect(sel, value) {
+    sel.innerHTML = expTree().map((g) => `<optgroup label="${esc(g.ar)}">${g.subs.map((s) => `<option value="${s.id}">${esc(s.ar)}</option>`).join("")}</optgroup>`).join("");
+    if (value) sel.value = value;
+  }
+  function renderAgain() {
+    const sub = $("#x-sub").value, items = C.recentItems(expenses, sub, 8);
+    $("#x-items").innerHTML = items.map((r) => `<option value="${esc(r.item)}"></option>`).join("");
+    $("#x-again").innerHTML = items.length ? `<span class="lbl" style="align-self:center">شراء مرة أخرى:</span>` + items.map((r, i) => `<button type="button" class="chip-btn" data-again="${i}">${esc(r.item)} <b>${fmtDH(r.amount)}</b></button>`).join("") : "";
+    $$("#x-again [data-again]").forEach((b) => b.addEventListener("click", () => {
+      const r = items[Number(b.dataset.again)];
+      addExpense({ date: $("#x-date").value || today(), sub, item: r.item, amount: r.amount, note: "" });
+    }));
+  }
+  function addExpense(x) {
+    const subIds = expTree().flatMap((g) => g.subs.map((s) => s.id));
+    const v = C.validateExpense(x, subIds);
+    if (!v.ok) { $("#x-errs").innerHTML = v.errors.map((t) => `<li>${t}</li>`).join(""); return false; }
+    $("#x-errs").innerHTML = "";
+    expenses.push({ id: newId(), ...x }); saveExp();
+    const g = expTree().find((gg) => gg.subs.some((s) => s.id === x.sub)); if (g) { openGroups.add(g.id); store.set("exp-open", JSON.stringify([...openGroups])); }
+    xMonth = C.monthOf(x.date);
+    $("#savestate").textContent = `أُضيف ${fmtDH(x.amount)} درهم ✓`;
+    renderExp(); renderHomeExp();
+    return true;
+  }
+  $("#x-sub").addEventListener("change", () => { store.set("exp-last-sub", $("#x-sub").value); renderAgain(); });
+  $("#x-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const ok = addExpense({ date: $("#x-date").value, sub: $("#x-sub").value, item: $("#x-item").value.trim(), amount: C.parseAmount($("#x-amount").value), note: $("#x-note").value.trim() });
+    if (ok) { $("#x-item").value = ""; $("#x-amount").value = ""; $("#x-note").value = ""; }
+  });
+  $("#m-prev").addEventListener("click", () => { xMonth = C.addMonths(xMonth, -1); renderExp(); });
+  $("#m-next").addEventListener("click", () => { xMonth = C.addMonths(xMonth, 1); renderExp(); });
+  $("#m-now").addEventListener("click", () => { xMonth = thisMonth(); renderExp(); });
+  function renderExp() {
+    const tree = expTree(), treeIds = tree.map((g) => ({ id: g.id, subs: g.subs }));
+    const s = C.expenseSummary(expenses, xMonth, treeIds), prev = C.expenseSummary(expenses, C.addMonths(xMonth, -1), treeIds);
+    $("#m-label").textContent = monthName(xMonth);
+    $("#x-total").innerHTML = `${fmtDH(s.total)}<small> درهم</small>`;
+    $("#x-count").textContent = `${s.count} عملية`;
+    $("#x-prev").innerHTML = `${fmtDH(prev.total)}<small> درهم</small>`;
+    const diff = s.total - prev.total;
+    $("#x-diff").innerHTML = prev.total ? `<span style="color:${diff > 0 ? "var(--bad)" : "var(--accent)"}">${diff > 0 ? "+" : "−"}${fmtDH(Math.abs(diff))} درهم (${Math.round((Math.abs(diff) / prev.total) * 100)}%)</span>` : "لا توجد بيانات";
+    const [yy, mm] = xMonth.split("-").map(Number);
+    const daysCount = xMonth === thisMonth() ? new Date().getDate() : new Date(yy, mm, 0).getDate();
+    $("#x-avg").innerHTML = `${fmtDH(s.total / daysCount)}<small> درهم</small>`;
+    const topG = Object.entries(s.byGroup).sort((a, b) => b[1] - a[1])[0];
+    $("#x-top").textContent = topG ? (tree.find((g) => g.id === topG[0]) || { ar: "أخرى" }).ar : "—";
+    $("#x-top-d").textContent = topG ? `${fmtDH(topG[1])} درهم · ${Math.round((topG[1] / s.total) * 100)}%` : "";
+    $("#x-sum-lbl").textContent = `${monthName(xMonth)} · ${fmtDH(s.total)} درهم`;
+    if (!$("#x-date").value) $("#x-date").value = today();
+    const max = Math.max(1, ...Object.values(s.byGroup));
+    $("#x-groups").innerHTML = tree.map((g) => {
+      const gt = s.byGroup[g.id] || 0;
+      const subsHtml = g.subs.map((sb) => {
+        const st = s.bySub[sb.id];
+        const list = expenses.filter((e) => e.sub === sb.id && C.monthOf(e.date) === xMonth).sort((a, b) => (a.date < b.date ? 1 : -1));
+        return `<div class="sub"><div class="sub-h"><span>${esc(sb.ar)}${sb.custom ? ` <span class="pill n">خاصة</span>` : ""}</span><span><span class="amt">${st ? fmtDH(st.sum) : "0"}</span> <span class="dh">درهم${st ? " · " + st.count + "×" : ""}</span>
+          <button class="btn" data-quick="${sb.id}" style="padding:2px 8px;margin-inline-start:6px">+</button></span></div>
+          ${list.length ? `<div class="sub-list">${list.map((e) => `<div><span class="dt">${e.date.slice(8)}/${e.date.slice(5, 7)}</span><span>${esc(e.item || "—")}${e.note ? ` <span class="lbl">${esc(e.note)}</span>` : ""}</span><span class="a">${fmtDH(e.amount)}</span><button class="x-del" data-del="${e.id}" aria-label="حذف">×</button></div>`).join("")}</div>` : ""}
+        </div>`;
+      }).join("");
+      return `<details class="grp" data-g="${g.id}" ${openGroups.has(g.id) ? "open" : ""}><summary><span class="nm">${esc(g.ar)}</span><span><span class="amt">${fmtDH(gt)}</span> <span class="dh">درهم</span></span><span class="bar"><i style="width:${(gt / max) * 100}%;background:${g.col}"></i></span></summary>
+        <div class="subs">${subsHtml}<form class="add-sub" data-addsub="${g.id}"><input type="text" placeholder="فئة جديدة في «${esc(g.ar)}»" maxlength="40" aria-label="فئة جديدة"><button class="btn" type="submit">إضافة فئة</button></form></div></details>`;
+    }).join("");
+    $$("#x-groups details.grp").forEach((d) => d.addEventListener("toggle", () => { d.open ? openGroups.add(d.dataset.g) : openGroups.delete(d.dataset.g); store.set("exp-open", JSON.stringify([...openGroups])); }));
+    $$("#x-groups [data-del]").forEach((b) => b.addEventListener("click", () => {
+      if (b.dataset.confirm !== "1") { b.dataset.confirm = "1"; b.textContent = "حذف؟"; b.style.color = "var(--bad)"; setTimeout(() => { if (b.isConnected) { b.dataset.confirm = ""; b.textContent = "×"; b.style.color = ""; } }, 3000); return; }
+      expenses = expenses.filter((e) => e.id !== b.dataset.del); saveExp(); renderExp(); renderHomeExp();
+    }));
+    $$("#x-groups [data-quick]").forEach((b) => b.addEventListener("click", () => {
+      $("#x-sub").value = b.dataset.quick; store.set("exp-last-sub", b.dataset.quick); renderAgain();
+      $("#x-panel").scrollIntoView({ behavior: "smooth", block: "start" }); $("#x-amount").focus({ preventScroll: true });
+    }));
+    $$("#x-groups [data-addsub]").forEach((f) => f.addEventListener("submit", (e) => {
+      e.preventDefault(); const name = f.querySelector("input").value.trim(); if (!name) return;
+      customSubs.push({ id: "c_" + newId(), group: f.dataset.addsub, ar: name }); store.set("exp-custom", JSON.stringify(customSubs));
+      const keep = $("#x-sub").value; fillSubSelect($("#x-sub"), keep); fillSubSelect($("#b-sub"), $("#b-sub").value); renderExp();
+    }));
+  }
+  function renderHomeExp() {
+    const tree = expTree(), s = C.expenseSummary(expenses, thisMonth(), tree), prev = C.expenseSummary(expenses, C.addMonths(thisMonth(), -1), tree);
+    $("#k-exp").innerHTML = `${fmtDH(s.total)}<small> درهم</small>`;
+    const diff = s.total - prev.total;
+    $("#k-exp-d").textContent = prev.total ? `${diff > 0 ? "+" : "−"}${fmtDH(Math.abs(diff))} مقارنة بالشهر السابق` : `${s.count} عملية`;
+    const rows = tree.map((g) => ({ g, v: s.byGroup[g.id] || 0 })).filter((r) => r.v > 0).sort((a, b) => b.v - a.v);
+    $("#home-exp").innerHTML = rows.length ? `<div class="stack" style="display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)">${rows.map((r) => `<i style="display:block;width:${(r.v / s.total) * 100}%;background:${r.g.col}"></i>`).join("")}</div>
+      <div class="legend">${rows.map((r) => `<span><i style="background:${r.g.col}"></i>${esc(r.g.ar)} <b class="num">${fmtDH(r.v)}</b></span>`).join("")}</div>
+      <p class="lbl">المجموع: <b class="num" style="color:var(--ink)">${fmtDH(s.total)} درهم</b> · ${monthName(thisMonth())}</p>`
+      : `<p class="muted">لا توجد مصاريف مسجلة هذا الشهر. أضفها من صفحة «المصاريف».</p>`;
+  }
+
+  // ---------- Bills / recurring payments
+  let bills = jget("bills", []);
+  const saveBills = () => { store.set("bills", JSON.stringify(bills)); syncBillsNative(); };
+  let bEditing = null;
+  const FREQ_AR = { monthly: "شهري", yearly: "سنوي", once: "مرة واحدة" };
+  const fmtDate = (k) => { const d = parseKey(k); return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+  function dueText(d) {
+    if (d.status === "paid") return `<span class="pill g">مدفوع</span>`;
+    if (d.days < 0) return `<span class="pill r">متأخر ${-d.days} يوم</span>`;
+    if (d.days === 0) return `<span class="pill y">اليوم</span>`;
+    if (d.days === 1) return `<span class="pill y">غدًا</span>`;
+    return `<span class="pill ${d.status === "soon" ? "y" : "n"}">بعد ${d.days} يوم</span>`;
+  }
+  function payBill(id) {
+    const b = bills.find((x) => x.id === id); if (!b) return;
+    const d = C.billDue(b, today()); if (d.status === "paid") return;
+    b.paid = [...(b.paid || []), d.period];
+    expenses.push({ id: newId(), date: today(), sub: b.sub || "misc", item: b.name, amount: b.amount, note: "التزام · " + (d.period === "once" ? fmtDate(d.due) : d.period) }); saveExp();
+    saveBills(); renderBills(); renderExp(); renderHomeExp();
+    $("#savestate").textContent = `سُجّل دفع «${b.name}» ✓`;
+  }
+  function renderBills() {
+    const t = today();
+    const rows = bills.map((b) => ({ b, d: C.billDue(b, t) })).sort((a, b) => (a.d.status === "paid") - (b.d.status === "paid") || a.d.days - b.d.days);
+    const up = C.upcomingBills(bills, t);
+    $("#b-count").textContent = bills.length;
+    const monthly = bills.filter((b) => b.freq === "monthly").reduce((a, b) => a + b.amount, 0) + bills.filter((b) => b.freq === "yearly").reduce((a, b) => a + b.amount / 12, 0);
+    $("#b-monthly").textContent = bills.length ? `≈ ${fmtDH(monthly)} درهم شهريًا` : "";
+    $("#b-soon").textContent = up.filter((x) => x.d.status === "soon").length;
+    $("#b-late").innerHTML = (() => { const n = up.filter((x) => x.d.status === "overdue").length; return n ? `<span style="color:var(--bad)">${n}</span>` : "0"; })();
+    $("#b-30").textContent = fmtDH(rows.filter((r) => r.d.status !== "paid" && r.d.days <= 30).reduce((a, r) => a + r.b.amount, 0));
+    $("#nb-bills").textContent = up.length || "";
+    $("#b-table").innerHTML = rows.length ? rows.map(({ b, d }) => `<tr class="click ${bEditing === b.id ? "sel" : ""}" data-id="${b.id}">
+      <td><b>${esc(b.name)}</b><div class="lbl">${FREQ_AR[b.freq]} · تنبيه قبل ${b.margin} يوم · ${esc(subName(b.sub))}</div></td>
+      <td class="n">${fmtDH(b.amount)}</td><td class="n">${fmtDate(d.due)}</td><td>${dueText(d)}</td>
+      <td>${d.status !== "paid" ? `<button class="btn pri" data-pay="${b.id}">تم الدفع</button>` : ""}</td></tr>`).join("")
+      : `<tr><td colspan="5" class="empty">لا توجد التزامات بعد. أضف الكراء أو التأمين أو الاشتراكات من النموذج أدناه.</td></tr>`;
+    $$("#b-table tr.click").forEach((tr) => tr.addEventListener("click", () => openBill(tr.dataset.id)));
+    $$("#b-table [data-pay]").forEach((btn) => btn.addEventListener("click", (e) => { e.stopPropagation(); payBill(btn.dataset.pay); }));
+    // dashboard
+    $("#home-bills").hidden = !up.length;
+    $("#home-bills-list").innerHTML = up.map(({ b, d }) => `<div class="due-row ${d.status === "overdue" ? "late" : "soon"}">
+      <span class="t">${esc(b.name)}</span><span class="r"><span class="a">${fmtDH(b.amount)} DH</span><button class="btn pri" data-pay="${b.id}">تم الدفع</button></span>
+      <span class="s">${dueText(d)} · ${fmtDate(d.due)}</span></div>`).join("");
+    $$("#home-bills-list [data-pay]").forEach((btn) => btn.addEventListener("click", () => payBill(btn.dataset.pay)));
+  }
+  function syncBillForm() { const m = $("#b-freq").value === "monthly"; $("#b-day-l").hidden = !m; $("#b-date-l").hidden = m; }
+  $("#b-freq").addEventListener("change", syncBillForm);
+  function openBill(id) {
+    const b = id ? bills.find((x) => x.id === id) : null; bEditing = b ? b.id : null;
+    $("#b-form-title").textContent = b ? "تعديل الالتزام" : "التزام جديد";
+    $("#b-name").value = b ? b.name : ""; $("#b-amount").value = b ? String(b.amount).replace(".", ",") : "";
+    $("#b-freq").value = b ? b.freq : "monthly"; $("#b-day").value = b && b.day ? b.day : 1; $("#b-date").value = b && b.date ? b.date : today();
+    $("#b-margin").value = b ? b.margin : 3; fillSubSelect($("#b-sub"), b ? b.sub : "rent");
+    $("#b-save").textContent = b ? "حفظ التعديلات" : "إضافة"; $("#b-del").hidden = !b; $("#b-del").dataset.confirm = ""; $("#b-del").textContent = "حذف"; $("#b-errs").innerHTML = "";
+    syncBillForm(); renderBills();
+    if (b) $("#b-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  $("#b-cancel").addEventListener("click", () => openBill(null));
+  $("#b-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const freq = $("#b-freq").value;
+    const data = { name: $("#b-name").value.trim(), amount: C.parseAmount($("#b-amount").value), freq, day: freq === "monthly" ? parseInt($("#b-day").value, 10) : undefined, date: freq !== "monthly" ? $("#b-date").value : undefined, margin: parseInt($("#b-margin").value, 10), sub: $("#b-sub").value };
+    const v = C.validateBill(data);
+    if (!v.ok) { $("#b-errs").innerHTML = v.errors.map((t) => `<li>${t}</li>`).join(""); return; }
+    if (bEditing) { const b = bills.find((x) => x.id === bEditing); Object.assign(b, data); }
+    else bills.push({ id: newId(), ...data, since: today(), paid: [] });
+    saveBills(); openBill(null); lnInit();
+    $("#savestate").textContent = "حُفظ ✓";
+  });
+  $("#b-del").addEventListener("click", () => {
+    if (!bEditing) return;
+    if ($("#b-del").dataset.confirm !== "1") { $("#b-del").dataset.confirm = "1"; $("#b-del").textContent = "هل أنت متأكد؟ اضغط مرة أخرى"; return; }
+    bills = bills.filter((b) => b.id !== bEditing); saveBills(); openBill(null);
+  });
+  async function syncBillsNative() {
+    if (!LN) return;
+    await cancelWhere((x) => !!x.bill);
+    const pending = bills.map((b) => ({ b, d: C.billDue(b, today()) })).filter((x) => x.d.status !== "paid");
+    if (!pending.length || !(await lnInit())) return;
+    const now = Date.now(), items = [];
+    pending.forEach(({ b, d }) => {
+      const due = parseKey(d.due);
+      const at1 = new Date(due.getFullYear(), due.getMonth(), due.getDate() - b.margin, 9, 0);
+      const at2 = new Date(due.getFullYear(), due.getMonth(), due.getDate(), 9, 0);
+      if (b.margin > 0 && at1.getTime() > now) items.push({ id: nid("bill:" + b.id, d.period + "a"), title: `💳 ${b.name} · ${fmtDH(b.amount)} درهم`, body: `الاستحقاق بعد ${b.margin} يوم (${fmtDate(d.due)})`, channelId: "bills", schedule: { at: at1, allowWhileIdle: true }, extra: { bill: b.id } });
+      if (at2.getTime() > now) items.push({ id: nid("bill:" + b.id, d.period + "b"), title: `💳 اليوم: ${b.name} · ${fmtDH(b.amount)} درهم`, body: "حان موعد الدفع", channelId: "bills", schedule: { at: at2, allowWhileIdle: true }, extra: { bill: b.id } });
+    });
+    try { if (items.length) await LN.schedule({ notifications: items }); } catch (e) {}
+  }
+
   // ---------- Sources
   const SRC = [["NIH Office of Dietary Supplements", "الحاجة اليومية، UL، أعراض النقص، التداخلات", "https://ods.od.nih.gov/"], ["ISSN — Position stands", "Créatine وprotéines وcaféine لدى الرياضيين", "https://jissn.biomedcentral.com/"], ["EFSA", "حدود السلامة الأوروبية (UL، caféine)", "https://www.efsa.europa.eu/en/topics/topic/dietary-reference-values"], ["WADA — Prohibited List", "المواد المحظورة في الرياضة", "https://www.wada-ama.org/en/prohibited-list"]];
   $("#src-table").innerHTML = SRC.map(([t, d, u]) => `<tr><td class="lat" style="text-align:right"><b>${t}</b></td><td>${d}</td><td><a class="lat" href="${u}" target="_blank" rel="noopener">${u.replace("https://", "")}</a></td></tr>`).join("");
@@ -846,14 +1180,16 @@ td.best { color: var(--accent); font-weight: 600; }
   async function boot() {
     await loadDay(today()); await openDay(cur);
     renderHome(); renderWeek(); renderMin(); renderSup(); renderCmp(); checkAlarms();
+    fillSubSelect($("#x-sub"), store.get("exp-last-sub") || "veg"); $("#x-date").value = today(); renderAgain(); renderExp(); renderHomeExp(); openBill(null);
     if (NATIVE) {
       $("#alarm-note").textContent = "يرنّ المنبه في الهاتف عند ساعة البداية حتى لو كان التطبيق مغلقًا. في المرة الأولى سيطلب منك التطبيق إذن الإشعارات.";
-      $$(".kpi .d").forEach((d) => { if (d.textContent.includes("محلولة")) d.textContent = "ترنّ حتى لو كان التطبيق مغلقًا"; });
-      syncNativeAhead();
+      $$(".kpi .d").forEach((d) => { if (d.textContent.includes("مفتوحة")) d.textContent = "ترنّ حتى لو كان التطبيق مغلقًا"; });
+      syncNativeAhead(); syncBillsNative();
     }
   }
   boot();
-  setInterval(() => { checkAlarms(); if (cur === today() && !$("#v-cal").hidden) renderCal(); renderHome(); }, 20000);
+  let lastDay = today();
+  setInterval(() => { checkAlarms(); if (cur === today() && !$("#v-cal").hidden) renderCal(); renderHome(); if (today() !== lastDay) { lastDay = today(); renderBills(); renderHomeExp(); } }, 20000);
   go(store.get("supp-tab") || "home", true);
   (async () => {
     try {

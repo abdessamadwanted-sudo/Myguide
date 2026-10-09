@@ -149,6 +149,53 @@ test("Profil: valeurs invalides refusées, mineurs exclus", () => {
   assert.equal(C.validateProfile({ heightCm: 90, weightKg: 60, age: 30, sex: "h", activity: "modere" }).ok, false);
   assert.equal(C.validateProfile({ heightCm: 175, weightKg: 60, age: 30, sex: "x", activity: "modere" }).ok, false);
 });
+const TREE = [{ id: "food", subs: [{ id: "veg" }, { id: "fruit" }] }, { id: "home", subs: [{ id: "rent" }] }];
+test("Dépenses: montant, validation, somme mensuelle par groupe", () => {
+  assert.equal(C.parseAmount("12,5"), 12.5);
+  assert.ok(Number.isNaN(C.parseAmount("abc")));
+  assert.equal(C.validateExpense({ date: "2026-10-09", sub: "veg", amount: 20 }, ["veg"]).ok, true);
+  assert.equal(C.validateExpense({ date: "2026-10-09", sub: "x", amount: 0 }, ["veg"]).errors.length, 2);
+  const e = [
+    { date: "2026-10-01", sub: "rent", amount: 2500 }, { date: "2026-10-03", sub: "veg", amount: 35.5, item: "طماطم" },
+    { date: "2026-10-07", sub: "veg", amount: 20, item: "Tomates" }, { date: "2026-10-07", sub: "fruit", amount: 18 },
+    { date: "2026-09-30", sub: "veg", amount: 99 },
+  ];
+  const s = C.expenseSummary(e, "2026-10", TREE);
+  assert.equal(s.total, 2573.5); assert.equal(s.count, 4);
+  assert.deepEqual(s.byGroup, { home: 2500, food: 73.5 });
+  assert.deepEqual(s.bySub.veg, { sum: 55.5, count: 2 });
+  assert.equal(C.addMonths("2026-01", -1), "2025-12");
+});
+test("Dépenses: articles récents pour « acheter à nouveau »", () => {
+  const e = [{ date: "2026-10-01", sub: "veg", item: "Tomates", amount: 10 }, { date: "2026-10-05", sub: "veg", item: "tomates ", amount: 12 }, { date: "2026-10-04", sub: "veg", item: "Oignons", amount: 6 }];
+  const r = C.recentItems(e, "veg");
+  assert.deepEqual(r.map((x) => [x.item, x.amount, x.times]), [["tomates", 12, 2], ["Oignons", 6, 1]]);
+});
+test("Échéances: mensuelle, marge, payée, en retard, fin de mois", () => {
+  const rent = { name: "كراء", amount: 2500, freq: "monthly", day: 5, margin: 3, since: "2026-09-01", paid: [] };
+  assert.equal(C.validateBill(rent).ok, true);
+  assert.deepEqual(C.billDue({ ...rent, since: "2026-10-01" }, "2026-10-01"), { due: "2026-10-05", period: "2026-10", days: 4, status: "later" });
+  assert.equal(C.billDue({ ...rent, since: "2026-10-01" }, "2026-10-02").status, "soon");
+  assert.equal(C.billDue({ ...rent, paid: ["2026-09"] }, "2026-10-07").status, "overdue");
+  assert.equal(C.billDue({ ...rent, paid: ["2026-09", "2026-10"] }, "2026-10-07").due, "2026-11-05");
+  // ajouté le 9 octobre, échéance le 5 : octobre est considéré comme déjà réglé → novembre
+  assert.equal(C.billDue({ ...rent, since: "2026-10-09" }, "2026-10-09").due, "2026-11-05");
+  // septembre non payé (ajouté en août) → en retard début octobre
+  const lateSep = C.billDue({ ...rent, since: "2026-08-01" }, "2026-10-01");
+  assert.deepEqual([lateSep.period, lateSep.status], ["2026-09", "overdue"]);
+  const eom = { name: "x", amount: 1, freq: "monthly", day: 31, margin: 0, paid: [], since: "2026-02-01" };
+  assert.equal(C.billDue(eom, "2026-02-10").due, "2026-02-28");
+});
+test("Échéances: annuelle, unique, liste des proches", () => {
+  const ins = { name: "Assurance", amount: 1800, freq: "yearly", date: "2025-11-01", margin: 30, paid: [], since: "2026-10-01" };
+  assert.deepEqual(C.billDue(ins, "2026-10-09"), { due: "2026-11-01", period: "2026", days: 23, status: "soon" });
+  assert.equal(C.billDue({ ...ins, paid: ["2026"] }, "2026-10-09").due, "2027-11-01");
+  const f = { name: "Formation", amount: 900, freq: "once", date: "2026-12-01", margin: 7, paid: [], since: "2026-10-01" };
+  assert.equal(C.billDue(f, "2026-10-09").status, "later");
+  assert.equal(C.billDue({ ...f, paid: ["once"] }, "2026-12-03").status, "paid");
+  const up = C.upcomingBills([ins, f, { name: "Gym", amount: 200, freq: "monthly", day: 8, margin: 2, paid: [], since: "2026-10-01" }], "2026-10-09");
+  assert.deepEqual(up.map((x) => x.b.name), ["Gym", "Assurance"]);
+});
 test("Recherche: synonymes, accents et filtre catégorie", () => {
   assert.equal(C.searchSupplements(SUPPLEMENTS, "creatine")[0].id, "creatine-monohydrate");
   assert.ok(C.searchSupplements(SUPPLEMENTS, "glycinate").some((s) => s.id === "magnesium"));

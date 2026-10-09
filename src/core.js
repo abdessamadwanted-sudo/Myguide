@@ -194,6 +194,81 @@
     return [];
   }
 
+  // ---- Dépenses
+  const parseAmount = (v) => { const n = parseFloat(String(v ?? "").replace(/\s/g, "").replace(",", ".")); return Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN; };
+  const monthOf = (key) => String(key || "").slice(0, 7);
+  function addMonths(month, n) { const [y, m] = month.split("-").map(Number); const d = new Date(y, m - 1 + n, 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; }
+  function validateExpense(x, subIds) {
+    const errors = [];
+    if (!x || !/^\d{4}-\d{2}-\d{2}$/.test(x.date || "")) errors.push("التاريخ غير صحيح");
+    if (!x || !(subIds || []).includes(x.sub)) errors.push("اختر الفئة");
+    if (!x || !(typeof x.amount === "number" && x.amount > 0 && x.amount < 1e7)) errors.push("أدخل مبلغًا صحيحًا بالدرهم");
+    return { ok: errors.length === 0, errors };
+  }
+  // tree: [{id, subs:[{id}]}]
+  function expenseSummary(entries, month, tree) {
+    const groupOf = {}; (tree || []).forEach((g) => g.subs.forEach((s) => { groupOf[s.id] = g.id; }));
+    const byGroup = {}, bySub = {}; let total = 0, count = 0;
+    (entries || []).filter((e) => monthOf(e.date) === month).forEach((e) => {
+      const a = Number(e.amount) || 0; total += a; count++;
+      const g = groupOf[e.sub] || "autre"; byGroup[g] = (byGroup[g] || 0) + a;
+      const s = (bySub[e.sub] = bySub[e.sub] || { sum: 0, count: 0 }); s.sum += a; s.count++;
+    });
+    const r2 = (n) => Math.round(n * 100) / 100;
+    Object.keys(byGroup).forEach((k) => (byGroup[k] = r2(byGroup[k])));
+    Object.values(bySub).forEach((s) => (s.sum = r2(s.sum)));
+    return { total: r2(total), count, byGroup, bySub };
+  }
+  // Articles déjà achetés dans une sous-catégorie (pour « acheter à nouveau »), le plus récent d'abord
+  function recentItems(entries, sub, limit = 6) {
+    const seen = new Map();
+    [...(entries || [])].filter((e) => e.sub === sub && e.item).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)).forEach((e) => {
+      const k = e.item.trim().toLowerCase(); if (!seen.has(k)) seen.set(k, { item: e.item.trim(), amount: e.amount, times: 0 });
+      seen.get(k).times++;
+    });
+    return [...seen.values()].slice(0, limit);
+  }
+
+  // ---- Échéances (paiements récurrents) : monthly (jour du mois) | yearly | once (date)
+  const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
+  const keyOf = (y, m, d) => `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const dayDiff = (a, b) => { const p = (k) => { const [y, m, d] = k.split("-").map(Number); return Date.UTC(y, m - 1, d); }; return Math.round((p(b) - p(a)) / 864e5); };
+  function validateBill(b) {
+    const errors = [];
+    if (!b || !String(b.name || "").trim()) errors.push("أدخل اسم الالتزام");
+    if (!b || !(typeof b.amount === "number" && b.amount > 0)) errors.push("أدخل مبلغًا صحيحًا بالدرهم");
+    if (!b || !["monthly", "yearly", "once"].includes(b.freq)) errors.push("اختر الدورية");
+    if (b && b.freq === "monthly" && !(Number.isInteger(b.day) && b.day >= 1 && b.day <= 31)) errors.push("يوم الاستحقاق بين 1 و31");
+    if (b && b.freq !== "monthly" && !/^\d{4}-\d{2}-\d{2}$/.test(b.date || "")) errors.push("أدخل تاريخ الاستحقاق");
+    if (!b || !(Number.isInteger(b.margin) && b.margin >= 0 && b.margin <= 60)) errors.push("الهامش بين 0 و60 يومًا");
+    return { ok: errors.length === 0, errors };
+  }
+  // Échéance courante : première période non payée (précédente, actuelle, suivante) dont l'échéance tombe après « since »
+  function billDue(b, today) {
+    const paid = new Set(b.paid || []), since = b.since || "";
+    const [ty, tm] = today.split("-").map(Number);
+    let cands = [];
+    if (b.freq === "monthly") {
+      for (const off of [-1, 0, 1]) {
+        const d = new Date(ty, tm - 1 + off, 1), y = d.getFullYear(), m = d.getMonth() + 1;
+        cands.push({ period: keyOf(y, m, 1).slice(0, 7), due: keyOf(y, m, Math.min(b.day, daysInMonth(y, m))) });
+      }
+    } else if (b.freq === "yearly") {
+      const [, m, d] = b.date.split("-").map(Number);
+      cands = [ty - 1, ty, ty + 1].map((y) => ({ period: String(y), due: keyOf(y, m, Math.min(d, daysInMonth(y, m))) }));
+    } else {
+      cands = [{ period: "once", due: b.date }];
+      if (paid.has("once")) return { due: b.date, period: "once", days: dayDiff(today, b.date), status: "paid" };
+    }
+    const c = cands.find((x) => !paid.has(x.period) && x.due >= since) || cands[cands.length - 1];
+    const days = dayDiff(today, c.due);
+    const status = days < 0 ? "overdue" : days <= (b.margin || 0) ? "soon" : "later";
+    return { due: c.due, period: c.period, days, status };
+  }
+  function upcomingBills(bills, today) {
+    return (bills || []).map((b) => ({ b, d: billDue(b, today) })).filter((x) => x.d.status === "overdue" || x.d.status === "soon").sort((a, b) => a.d.days - b.d.days);
+  }
+
   // ---- Profil corporel : IMC (OMS), Mifflin-St Jeor, besoins énergétiques, eau (EFSA)
   const ACTIVITY = { sedentaire: 1.2, leger: 1.375, modere: 1.55, actif: 1.725, tres_actif: 1.9 };
   const GOAL_DELTA = { perte: -400, maintien: 0, prise: 400 };
@@ -239,7 +314,7 @@
     return "next";
   }
 
-  const api = { REMIND, REPEAT, alarmMin, occursOn, repeatSlots, ACTIVITY, validateProfile, bmiCategory, bodyStats, TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
+  const api = { parseAmount, monthOf, addMonths, validateExpense, expenseSummary, recentItems, dayDiff, validateBill, billDue, upcomingBills, REMIND, REPEAT, alarmMin, occursOn, repeatSlots, ACTIVITY, validateProfile, bmiCategory, bodyStats, TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.SuppCore = api;
 })(typeof window !== "undefined" ? window : globalThis);
