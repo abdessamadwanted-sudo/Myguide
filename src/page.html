@@ -1,0 +1,698 @@
+<title>دليل المكملات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: tableau de bord type BI — barre latérale gauche, barre de titre, cartes KPI, panneaux graphiques et tableaux */
+:root {
+  --bg: #0D0F13; --panel: #151920; --panel-2: #1B2028; --line: #262D37; --line-2: #313945;
+  --ink: #E9EDF2; --muted: #8C96A4; --faint: #5F6875;
+  --accent: #4ADE80; --accent-dim: rgba(74,222,128,.13);
+  --c1: #4ADE80; --c2: #60A5FA; --c3: #F2C14E; --c4: #A78BFA; --c5: #2DD4BF; --c6: #FB7185;
+  --warn: #F2C14E; --bad: #FB7185;
+  --body: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--body); font-size: 14px; line-height: 1.55; }
+h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.3; font-weight: 600; }
+h1 { font-size: 1.35rem; }
+h2 { font-size: .95rem; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+a { color: var(--accent); }
+.lat { direction: ltr; unicode-bidi: isolate; }
+.mono, .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.lbl { font-size: .72rem; color: var(--muted); letter-spacing: .04em; }
+
+/* Sidebar */
+.side { position: fixed; left: 0; top: 0; bottom: 0; width: 232px; background: var(--panel); border-right: 1px solid var(--line); z-index: 30; display: flex; flex-direction: column; padding: calc(16px + env(safe-area-inset-top, 0px)) 10px calc(14px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; transition: transform .22s ease; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 16px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.logo { width: 34px; height: 34px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; color: #07140C; font-weight: 700; font-family: var(--mono); font-size: .8rem; flex: none; }
+.brand b { display: block; font-size: .95rem; }
+.sec { font-size: .68rem; color: var(--faint); letter-spacing: .08em; padding: 12px 10px 4px; }
+.nav { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; border-radius: 6px; padding: 8px 10px; color: var(--muted); cursor: pointer; text-align: start; position: relative; }
+.nav:hover { background: var(--panel-2); color: var(--ink); }
+.nav[aria-current="true"] { background: var(--panel-2); color: var(--ink); }
+.nav[aria-current="true"]::before { content: ""; position: absolute; inset-inline-start: 0; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--accent); }
+.nav svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.nav .badge { margin-inline-start: auto; font-family: var(--mono); font-size: .7rem; color: var(--faint); }
+.side .foot { margin-top: auto; font-size: .72rem; color: var(--faint); padding: 10px; border-top: 1px solid var(--line); }
+.scrim { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 25; }
+.main { min-width: 0; }
+@media (min-width: 960px) { .main { margin-left: 232px; } .scrim { display: none; } #menu { display: none; } }
+@media (max-width: 959px) { .side { transform: translateX(-100%); box-shadow: 0 0 40px rgba(0,0,0,.6); } .side.open { transform: none; } }
+
+/* Top bar */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(13,15,19,.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+.crumb { font-size: .75rem; color: var(--muted); }
+.topbar .right { margin-inline-start: auto; display: flex; gap: 8px; align-items: center; }
+.page { padding-inline: 16px; padding-block: 18px 48px; max-width: 1240px; display: grid; gap: 14px; }
+
+/* Controls */
+.btn { background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 6px 12px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--muted); }
+.btn.pri { background: var(--accent); border-color: var(--accent); color: #07140C; font-weight: 600; }
+.btn.danger { color: var(--bad); }
+.icon-btn { width: 34px; height: 34px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line-2); cursor: pointer; display: grid; place-items: center; flex: none; }
+input[type=search], input[type=text], input[type=time], input[type=date], select, textarea { background: var(--bg); border: 1px solid var(--line-2); border-radius: 6px; padding: 7px 10px; min-width: 0; }
+textarea { resize: vertical; min-height: 60px; width: 100%; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filters input[type=search] { flex: 1 1 200px; }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 6px; overflow: hidden; }
+.seg button { background: none; border: 0; padding: 6px 12px; cursor: pointer; color: var(--muted); border-inline-start: 1px solid var(--line-2); }
+.seg button:first-child { border-inline-start: 0; }
+.seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--ink); }
+
+/* KPI + panels */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.kpi .v { font-family: var(--mono); font-size: 1.6rem; font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.kpi .v small { font-size: .8rem; color: var(--muted); }
+.kpi .d { font-size: .75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .meter { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.kpi .meter i { display: block; height: 100%; background: var(--accent); }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; display: flex; flex-direction: column; }
+.panel > header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.panel > header .lbl { margin-inline-start: auto; }
+.panel .body { padding: 14px; display: grid; gap: 12px; min-width: 0; }
+.panel .body.flush { padding: 0; }
+
+/* Tables */
+.tw { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { padding: 8px 12px; text-align: start; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font-size: .72rem; color: var(--muted); font-weight: 500; letter-spacing: .04em; background: var(--panel-2); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr.click { cursor: pointer; }
+tbody tr.click:hover td { background: var(--panel-2); }
+tbody tr.sel td { background: var(--accent-dim); }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.best { color: var(--accent); font-weight: 600; }
+.sym { font-family: var(--mono); font-weight: 500; display: inline-grid; place-items: center; min-width: 30px; height: 24px; border-radius: 4px; padding: 0 4px; background: var(--accent-dim); color: var(--accent); }
+.sym.o { background: rgba(242,193,78,.13); color: var(--c3); }
+.kv th { width: 150px; color: var(--muted); font-weight: 500; background: var(--panel-2); font-size: .8rem; }
+.kv ul { margin: 0; padding-inline-start: 18px; display: grid; gap: 2px; }
+.kv tr.def th { color: var(--bad); }
+.pill { font-size: .72rem; border-radius: 4px; padding: 1px 8px; white-space: nowrap; display: inline-block; }
+.pill.g { background: var(--accent-dim); color: var(--accent); }
+.pill.b { background: rgba(96,165,250,.14); color: var(--c2); }
+.pill.y { background: rgba(242,193,78,.13); color: var(--c3); }
+.pill.r { background: rgba(251,113,133,.13); color: var(--c6); }
+.pill.n { background: var(--panel-2); color: var(--muted); }
+.missing { font-size: .72rem; color: var(--warn); background: rgba(242,193,78,.12); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+.warns { margin: 0; padding-inline-start: 16px; color: var(--warn); font-size: .78rem; }
+.ok { color: var(--accent); font-size: .78rem; }
+.empty { color: var(--muted); padding: 22px; text-align: center; }
+.note { font-size: .78rem; color: var(--muted); border: 1px dashed var(--line-2); border-radius: 8px; padding: 8px 12px; }
+
+/* Chart */
+.chart svg { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font-family: var(--mono); font-size: 10px; }
+.chart .grid line { stroke: var(--line); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .76rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+/* Facts (supplement detail) */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.fact { border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 4px; min-width: 0; }
+.fact ul { margin: 0; padding-inline-start: 18px; }
+.fact.alert { border-color: rgba(251,113,133,.35); }
+.fact.alert .lbl { color: var(--bad); }
+.fact.dose { border-color: rgba(74,222,128,.35); }
+.fact.dose .lbl { color: var(--accent); }
+
+/* Calendar */
+.cal { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; }
+@media (max-width: 900px) { .cal { grid-template-columns: minmax(0, 1fr); } }
+.timeline { position: relative; margin-inline-start: 56px; border-inline-start: 1px solid var(--line); }
+.tl-hour { position: absolute; inset-inline: 0; border-top: 1px solid var(--line); }
+.tl-hour span { position: absolute; right: -56px; top: -8px; width: 48px; text-align: end; font-family: var(--mono); font-size: .72rem; color: var(--faint); direction: ltr; }
+.tl-now { position: absolute; inset-inline: 0; border-top: 2px solid var(--bad); z-index: 2; }
+.tl-now::before { content: ""; position: absolute; inset-inline-start: -5px; top: -5px; width: 8px; height: 8px; border-radius: 50%; background: var(--bad); }
+.ev { position: absolute; inset-inline: 6px; border-radius: 6px; padding: 4px 8px; background: var(--panel-2); border-inline-start: 3px solid var(--accent); overflow: hidden; cursor: pointer; display: flex; gap: 8px; align-items: flex-start; font-size: .8rem; border: 1px solid var(--line-2); border-inline-start-width: 3px; }
+.ev:hover { border-color: var(--muted); }
+.ev.sel { box-shadow: 0 0 0 2px var(--accent); }
+.ev.clash { background: repeating-linear-gradient(135deg, var(--panel-2), var(--panel-2) 6px, rgba(251,113,133,.08) 6px, rgba(251,113,133,.08) 12px); }
+.ev b { font-weight: 500; }
+.ev .t { font-family: var(--mono); color: var(--muted); font-size: .72rem; direction: ltr; white-space: nowrap; }
+.ev .bell { margin-inline-start: auto; color: var(--c3); }
+.form { display: grid; gap: 10px; }
+.form label { display: grid; gap: 4px; font-size: .78rem; color: var(--muted); }
+.form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.form input, .form select { width: 100%; }
+.errs { color: var(--bad); font-size: .8rem; margin: 0; padding-inline-start: 16px; }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--line-2); border-radius: 6px; padding: 8px 10px; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch .tr { width: 38px; height: 22px; border-radius: 11px; background: var(--line-2); position: relative; transition: background .15s; flex: none; }
+.switch .tr::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); transition: inset-inline-start .15s; }
+.switch input:checked + .tr { background: var(--accent); }
+.switch input:checked + .tr::after { inset-inline-start: 19px; background: #07140C; }
+.switch input:focus-visible + .tr { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mini-sw { display: inline-flex; }
+.mini-sw .tr { width: 30px; height: 18px; }
+.mini-sw .tr::after { width: 12px; height: 12px; }
+.mini-sw input:checked + .tr::after { inset-inline-start: 15px; }
+.mini-sw { border: 0; padding: 0; }
+
+/* Alarm toast */
+.toast { position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 50; background: var(--panel); border: 1px solid var(--c3); border-radius: 10px; padding: 12px 16px; display: flex; gap: 12px; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,.6); max-width: calc(100% - 32px); }
+.toast b { color: var(--c3); }
+.savestate { font-size: .72rem; color: var(--faint); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<aside class="side" id="side" dir="rtl" lang="ar" aria-label="القائمة">
+  <div class="brand"><span class="logo">SI</span><span><b>دليل المكملات</b><span class="lbl lat">Supplement Intelligence</span></span></div>
+  <button class="nav" data-tab="home"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>لوحة القيادة</button>
+  <div class="sec">التنظيم</div>
+  <button class="nav" data-tab="cal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>الأجندة<span class="badge" id="nb-cal"></span></button>
+  <div class="sec">المعطيات</div>
+  <button class="nav" data-tab="min"><svg viewBox="0 0 24 24"><path d="M12 2l8 5v10l-8 5-8-5V7z"/><path d="M12 22V12M20 7l-8 5-8-5"/></svg>المعادن<span class="badge">13</span></button>
+  <button class="nav" data-tab="sup"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9.2 9.2l5.6 5.6"/></svg>المكملات<span class="badge">8</span></button>
+  <button class="nav" data-tab="cmp"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>مقارنة المنتوجات</button>
+  <div class="sec">مراجع</div>
+  <button class="nav" data-tab="src"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6M9 14h6"/></svg>المصادر</button>
+  <div class="foot">محتوى تعليمي، ماشي بديل للطبيب أو الصيدلي.</div>
+</aside>
+<div class="scrim" id="scrim" hidden></div>
+
+<div class="main" dir="rtl" lang="ar">
+  <header class="topbar">
+    <button class="icon-btn" id="menu" aria-label="القائمة" aria-controls="side"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div><div class="crumb" id="crumb">Supplement Intelligence</div><h1 id="ptitle">لوحة القيادة</h1></div>
+    <div class="right"><span class="savestate" id="savestate"></span><span class="lbl num" id="clock"></span></div>
+  </header>
+
+  <!-- لوحة القيادة -->
+  <section class="page view" id="v-home">
+    <div class="kpis">
+      <div class="kpi"><span class="lbl">مواعيد اليوم</span><span class="v" id="k-count">0</span><span class="d" id="k-next">ما كاين حتى موعد</span></div>
+      <div class="kpi"><span class="lbl">الوقت المخطط اليوم</span><span class="v" id="k-hours">0<small> س</small></span><div class="meter"><i id="k-hours-m" style="width:0"></i></div></div>
+      <div class="kpi"><span class="lbl">منبهات مشعلة</span><span class="v" id="k-alarms">0</span><span class="d">كيرنو ملي الصفحة محلولة</span></div>
+      <div class="kpi"><span class="lbl">المعطيات</span><span class="v">21</span><span class="d">13 معدن · 8 مكملات</span></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><header><h2>ساعات الأسبوع حسب الفئة</h2><span class="lbl" id="wk-range"></span></header>
+        <div class="body"><div class="chart" id="wk-chart"></div><div class="legend" id="wk-legend"></div></div></div>
+      <div class="panel"><header><h2>برنامج اليوم</h2><button class="btn" data-go="cal">فتح الأجندة</button></header>
+        <div class="body flush tw"><table><thead><tr><th>الوقت</th><th>النشاط</th><th>الفئة</th><th>منبه</th></tr></thead><tbody id="home-today"></tbody></table></div></div>
+    </div>
+    <div class="panel"><header><h2>المعادن: الحاجة اليومية والمصادر</h2><button class="btn" data-go="min">الجدول الكامل</button></header>
+      <div class="body flush tw"><table><thead><tr><th>المعدن</th><th>الحاجة اليومية (بالغ)</th><th>أهم المصادر</th><th>علامة النقص الأولى</th></tr></thead><tbody id="home-min"></tbody></table></div></div>
+    <p class="note">القيم عند البالغين حسب NIH. المنتوجات والأثمنة فصفحة المقارنة خيالية (EXEMPLE).</p>
+  </section>
+
+  <!-- الأجندة -->
+  <section class="page view" id="v-cal" hidden>
+    <div class="filters">
+      <button class="icon-btn" id="d-prev" aria-label="النهار اللي فات">›</button>
+      <input type="date" id="d-pick" aria-label="التاريخ">
+      <button class="icon-btn" id="d-next" aria-label="النهار الجاي">‹</button>
+      <button class="btn" id="d-today">اليوم</button>
+      <strong id="d-label"></strong>
+      <span style="margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="d-copy">نسخ البارح</button>
+        <button class="btn pri" id="ev-new">+ موعد جديد</button>
+      </span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span class="lbl">المواعيد</span><span class="v" id="c-count">0</span></div>
+      <div class="kpi"><span class="lbl">الوقت المخطط</span><span class="v" id="c-hours">0</span></div>
+      <div class="kpi"><span class="lbl">منبهات</span><span class="v" id="c-alarms">0</span></div>
+      <div class="kpi"><span class="lbl">تداخل فالوقت</span><span class="v" id="c-clash">0</span></div>
+    </div>
+    <div class="cal">
+      <div class="panel"><header><h2>الخط الزمني</h2><span class="lbl">ضغط على أي ساعة باش تزيد موعد</span></header>
+        <div class="body"><div class="timeline" id="timeline"></div></div></div>
+      <div class="panel" id="ev-panel"><header><h2 id="ev-title">موعد جديد</h2></header>
+        <div class="body">
+          <form class="form" id="ev-form" novalidate>
+            <label>شنو غادي دير<input type="text" id="f-title" placeholder="مثلا: تدريب فالصالة" maxlength="80"></label>
+            <div class="two">
+              <label>البداية<input type="time" id="f-start" value="08:00"></label>
+              <label>النهاية<input type="time" id="f-end" value="09:00"></label>
+            </div>
+            <label>الفئة<select id="f-cat"></select></label>
+            <label class="switch"><span>منبه فساعة البداية</span><input type="checkbox" id="f-alarm"><span class="tr"></span></label>
+            <label>ملاحظة<textarea id="f-note" placeholder="اختياري"></textarea></label>
+            <ul class="errs" id="f-errs"></ul>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button type="submit" class="btn pri" id="f-save">زيد</button>
+              <button type="button" class="btn" id="f-cancel">إلغاء</button>
+              <button type="button" class="btn danger" id="f-del" hidden>مسح</button>
+            </div>
+          </form>
+        </div></div>
+    </div>
+    <div class="panel"><header><h2>جدول المواعيد</h2><span class="lbl" id="tbl-sum"></span></header>
+      <div class="body flush tw"><table><thead><tr><th>من</th><th>حتى</th><th>المدة</th><th>النشاط</th><th>الفئة</th><th>منبه</th><th></th></tr></thead><tbody id="ev-table"></tbody></table></div></div>
+    <p class="note" id="alarm-note">المنبه كيرن وكيبان فوق ملي هاد الصفحة محلولة. فتطبيق Android كيرن حتى والتطبيق مسدود.</p>
+  </section>
+
+  <!-- المعادن -->
+  <section class="page view" id="v-min" hidden>
+    <div class="filters">
+      <input type="search" id="m-q" placeholder="قلب على معدن، مصدر (عدس، حوت…) أو عرض" aria-label="بحث">
+      <div class="seg" role="group" aria-label="الفئة"><button aria-pressed="true" data-g="all">الكل</button><button aria-pressed="false" data-g="macro">Macro</button><button aria-pressed="false" data-g="oligo">Oligo</button></div>
+    </div>
+    <div class="panel"><header><h2>جدول المعادن</h2><span class="lbl" id="m-count"></span></header>
+      <div class="body flush tw"><table style="min-width:900px"><thead><tr><th>المعدن</th><th>الفئة</th><th>الفائدة فالجسم</th><th>منين تجيبو</th><th>أضرار النقص</th><th>الحاجة اليومية</th></tr></thead><tbody id="m-table"></tbody></table></div></div>
+    <div class="panel" id="m-detail" hidden></div>
+  </section>
+
+  <!-- المكملات -->
+  <section class="page view" id="v-sup" hidden>
+    <div class="filters">
+      <input type="search" id="q" placeholder="قلب: créatine، whey، magnésium…" aria-label="بحث">
+      <select id="cat" aria-label="الفئة"><option value="all">جميع الفئات</option></select>
+    </div>
+    <div class="panel"><header><h2>قاعدة بيانات المكملات</h2><span class="lbl" id="s-count"></span></header>
+      <div class="body flush tw"><table style="min-width:760px"><thead><tr><th>المكمل</th><th>الفئة</th><th>النوع</th><th>الدليل العلمي</th><th>الكمية المدروسة</th></tr></thead><tbody id="s-table"></tbody></table></div></div>
+    <div class="panel" id="s-detail" hidden></div>
+  </section>
+
+  <!-- المقارنة -->
+  <section class="page view" id="v-cmp" hidden>
+    <div class="filters"><div class="seg" role="group" aria-label="نوع المنتوج"><button aria-pressed="true" data-t="whey">Whey</button><button aria-pressed="false" data-t="creatine">Créatine</button></div>
+      <span class="lbl">ملي المعلومة ناقصة كنكتبو «غير متوفر». الأخضر = أحسن قيمة متوفرة.</span></div>
+    <div class="panel"><header><h2>مقارنة المنتوجات</h2><span class="pill y lat">EXEMPLE</span></header>
+      <div class="body flush tw"><table style="min-width:600px" id="cmp"></table></div></div>
+  </section>
+
+  <!-- المصادر -->
+  <section class="page view" id="v-src" hidden>
+    <div class="panel"><header><h2>المصادر المعتمدة</h2></header>
+      <div class="body flush tw"><table><thead><tr><th>المصدر</th><th>شنو كنخدو منو</th><th>الرابط</th></tr></thead><tbody id="src-table"></tbody></table></div></div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden role="alert"></div>
+
+<script>/*CORE*/</script>
+<script>/*DATA*/</script>
+<script>/*MIN*/</script>
+<script>
+(function () {
+  const C = window.SuppCore, D = window.SuppData, M = window.MinData;
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+  const MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "ماي", "يونيو", "يوليوز", "غشت", "شتنبر", "أكتوبر", "نونبر", "دجنبر"];
+  const CATS = [
+    { id: "sport", ar: "تدريب", c: "var(--c1)" }, { id: "travail", ar: "خدمة", c: "var(--c2)" },
+    { id: "repas", ar: "ماكلة", c: "var(--c3)" }, { id: "etude", ar: "تعلم", c: "var(--c4)" },
+    { id: "repos", ar: "راحة", c: "var(--c5)" }, { id: "perso", ar: "شخصي", c: "var(--c6)" },
+  ];
+  const CAT = Object.fromEntries(CATS.map((c) => [c.id, c]));
+  const catPill = (id) => CAT[id] ? `<span class="pill" style="background:color-mix(in srgb, ${CAT[id].c} 16%, transparent);color:${CAT[id].c}">${CAT[id].ar}</span>` : `<span class="pill n">—</span>`;
+  const parseKey = (k) => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
+  const fmtDay = (k) => { const d = parseKey(k); return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+  const fmtDur = (min) => min >= 60 ? `${Math.floor(min / 60)}س${min % 60 ? " " + (min % 60) + "د" : ""}` : `${min}د`;
+  const today = () => C.dateKey(new Date());
+  const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+  const ul = (a) => a && a.length ? `<ul>${a.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<span class="muted">لا شيء مسجل</span>`;
+
+  // ---------- Navigation
+  const TITLES = { home: ["Dashboard", "لوحة القيادة"], cal: ["Agenda", "الأجندة"], min: ["Minéraux", "المعادن"], sup: ["Suppléments", "المكملات"], cmp: ["Comparaison", "مقارنة المنتوجات"], src: ["Sources", "المصادر"] };
+  function setDrawer(o) { $("#side").classList.toggle("open", o); $("#scrim").hidden = !o; $("#menu").setAttribute("aria-expanded", o); }
+  $("#menu").addEventListener("click", () => setDrawer(true));
+  $("#scrim").addEventListener("click", () => setDrawer(false));
+  function go(tab) {
+    if (!TITLES[tab]) tab = "home";
+    $$(".nav").forEach((b) => b.setAttribute("aria-current", b.dataset.tab === tab));
+    $$(".view").forEach((v) => (v.hidden = v.id !== "v-" + tab));
+    $("#crumb").textContent = "Supplement Intelligence / " + TITLES[tab][0];
+    $("#ptitle").textContent = TITLES[tab][1];
+    store.set("supp-tab", tab); setDrawer(false); window.scrollTo({ top: 0 });
+  }
+  $$(".nav").forEach((b) => b.addEventListener("click", () => go(b.dataset.tab)));
+  $$("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
+
+  // ---------- Calendar data (db per viewer, fallback localStorage)
+  let db = null, uid = null, cur = today(), editing = null;
+  const days = {};
+  const local = { get(k) { try { return JSON.parse(store.get("cal-" + k) || "null"); } catch (e) { return null; } }, set(k, v) { store.set("cal-" + k, JSON.stringify(v)); } };
+  const legacy = (k) => { try { return JSON.parse(store.get("plan-" + k) || "null"); } catch (e) { return null; } };
+  const ref = (k) => db && uid ? db.collection("data/users/" + uid).doc("day-" + k) : null;
+  async function loadDay(k, force) {
+    if (days[k] && !force) return days[k];
+    let ev = null;
+    const r = ref(k);
+    if (r) { try { const s = await r.get(); if (s.exists) { const d = s.data() || {}; ev = Array.isArray(d.events) ? d.events.map((e) => ({ ...e })) : C.slotsToEvents(d.slots); } } catch (e) {} }
+    if (!ev) ev = local.get(k) || C.slotsToEvents(legacy(k) || {});
+    days[k] = ev; return ev;
+  }
+  let saveT = {};
+  function persist(k) {
+    clearTimeout(saveT[k]); $("#savestate").textContent = "كيتسجل…";
+    saveT[k] = setTimeout(async () => {
+      local.set(k, days[k]);
+      const r = ref(k);
+      if (r) { try { await r.set({ date: k, events: days[k] }); $("#savestate").textContent = "تسجل فحسابك ✓"; } catch (e) { $("#savestate").textContent = "تسجل فهاد الجهاز فقط"; } }
+      else $("#savestate").textContent = "تسجل فالتيليفون ✓";
+      syncNative(k);
+    }, 400);
+  }
+
+  // ---------- Native alarms (Android app via Capacitor): ring even when the app is closed
+  const LN = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins ? window.Capacitor.Plugins.LocalNotifications : null;
+  const NATIVE = !!LN;
+  let lnReady = null;
+  function lnInit() {
+    if (!LN) return Promise.resolve(false);
+    if (!lnReady) lnReady = (async () => {
+      try {
+        let p = await LN.checkPermissions();
+        if (p.display !== "granted") p = await LN.requestPermissions();
+        if (p.display !== "granted") { $("#savestate").textContent = "المنبهات محبوسة: فعل Notifications فالإعدادات"; return false; }
+        try { await LN.createChannel({ id: "alarms", name: "المنبهات", description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80" }); } catch (e) {}
+        return true;
+      } catch (e) { return false; }
+    })();
+    return lnReady;
+  }
+  const nid = (k, id) => { let h = 7; for (const ch of k + "|" + id) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h) % 2000000000 + 1; };
+  async function syncNative(k) {
+    if (!LN) return;
+    const list = days[k] || [];
+    if (!list.some((e) => e.alarm)) { try { const p = await LN.getPending(); const mine = p.notifications.filter((n) => n.extra && n.extra.day === k); if (mine.length) await LN.cancel({ notifications: mine.map((n) => ({ id: n.id })) }); } catch (e) {} return; }
+    if (!(await lnInit())) return;
+    try {
+      const p = await LN.getPending();
+      const old = p.notifications.filter((n) => n.extra && n.extra.day === k);
+      if (old.length) await LN.cancel({ notifications: old.map((n) => ({ id: n.id })) });
+      const base = parseKey(k), now = Date.now();
+      const items = list.filter((e) => e.alarm && C.toMin(e.start) !== null).map((e) => {
+        const at = new Date(base.getFullYear(), base.getMonth(), base.getDate(), 0, C.toMin(e.start));
+        return { id: nid(k, e.id), title: `⏰ ${e.start} · ${e.title}`, body: `حتى ${e.end}${e.note ? " — " + e.note : ""}`, channelId: "alarms", schedule: { at, allowWhileIdle: true }, extra: { day: k, ev: e.id } };
+      }).filter((n) => n.schedule.at.getTime() > now);
+      if (items.length) await LN.schedule({ notifications: items });
+    } catch (e) { $("#savestate").textContent = "ما قدرتش نبرمج المنبه"; }
+  }
+  async function syncNativeAhead() {
+    if (!LN) return;
+    for (let i = 0; i < 14; i++) { const k = C.addDays(today(), i); await loadDay(k); if ((days[k] || []).some((e) => e.alarm)) await syncNative(k); }
+  }
+
+  // ---------- Calendar UI
+  CATS.forEach((c) => { const o = document.createElement("option"); o.value = c.id; o.textContent = c.ar; $("#f-cat").appendChild(o); });
+  const HPX = 52;
+  function renderCal() {
+    const ev = C.sortEvents(days[cur] || []);
+    const clash = C.findOverlaps(ev);
+    const sum = C.summarizeEvents(ev);
+    $("#d-label").textContent = fmtDay(cur) + (cur === today() ? " · اليوم" : "");
+    $("#d-pick").value = cur;
+    $("#c-count").textContent = sum.count;
+    $("#c-hours").textContent = fmtDur(sum.minutes);
+    $("#c-alarms").textContent = sum.alarms;
+    $("#c-clash").innerHTML = clash.size ? `<span style="color:var(--bad)">${clash.size}</span>` : "0";
+    $("#tbl-sum").textContent = `${sum.count} موعد · ${fmtDur(sum.minutes)}`;
+    // timeline range
+    let from = 5, to = 24;
+    ev.forEach((e) => { from = Math.min(from, Math.floor(C.toMin(e.start) / 60)); to = Math.max(to, Math.ceil(C.toMin(e.end) / 60)); });
+    to = Math.min(to, 24);
+    const tl = $("#timeline");
+    tl.style.height = (to - from) * HPX + "px";
+    let html = "";
+    for (let h = from; h < to; h++) html += `<div class="tl-hour" style="top:${(h - from) * HPX}px;height:${HPX}px" data-h="${h}"><span>${String(h).padStart(2, "0")}:00</span></div>`;
+    if (cur === today()) { const n = nowMin(); if (n >= from * 60 && n < to * 60) html += `<div class="tl-now" style="top:${((n - from * 60) / 60) * HPX}px"></div>`; }
+    html += ev.map((e) => {
+      const top = ((C.toMin(e.start) - from * 60) / 60) * HPX, h = Math.max(22, (C.duration(e) / 60) * HPX - 2);
+      const c = CAT[e.cat] ? CAT[e.cat].c : "var(--faint)";
+      return `<div class="ev ${editing === e.id ? "sel" : ""} ${clash.has(e.id) ? "clash" : ""}" data-id="${e.id}" style="top:${top}px;height:${h}px;border-inline-start-color:${c}">
+        <span class="t">${e.start}–${e.end}</span><b>${esc(e.title)}</b>${e.alarm ? `<span class="bell" title="منبه">⏰</span>` : ""}</div>`;
+    }).join("");
+    tl.innerHTML = html;
+    $$("#timeline .ev").forEach((el) => el.addEventListener("click", (x) => { x.stopPropagation(); openForm(el.dataset.id); }));
+    $$("#timeline .tl-hour").forEach((el) => el.addEventListener("click", () => { const h = Number(el.dataset.h); openForm(null, C.fromMin(h * 60), C.fromMin(Math.min(h * 60 + 60, 23 * 60 + 59))); }));
+    // table
+    $("#ev-table").innerHTML = ev.length ? ev.map((e) => `<tr class="click ${editing === e.id ? "sel" : ""}" data-id="${e.id}">
+      <td class="n">${e.start}</td><td class="n">${e.end}</td><td class="n">${fmtDur(C.duration(e))}</td>
+      <td>${esc(e.title)}${clash.has(e.id) ? ` <span class="pill r">تداخل</span>` : ""}${e.note ? `<div class="lbl">${esc(e.note)}</div>` : ""}</td>
+      <td>${catPill(e.cat)}</td>
+      <td><label class="switch mini-sw" onclick="event.stopPropagation()"><input type="checkbox" id="al-${e.id}" data-al="${e.id}" ${e.alarm ? "checked" : ""} aria-label="منبه"><span class="tr"></span></label></td>
+      <td><button class="btn" data-edit="${e.id}">تعديل</button></td></tr>`).join("")
+      : `<tr><td colspan="7" class="empty">ما كاين حتى موعد فهاد النهار. ضغط «+ موعد جديد» أو على شي ساعة فالخط الزمني.</td></tr>`;
+    $$("#ev-table tr.click").forEach((tr) => tr.addEventListener("click", () => openForm(tr.dataset.id)));
+    $$("#ev-table [data-al]").forEach((i) => i.addEventListener("change", () => {
+      const e = days[cur].find((x) => x.id === i.dataset.al); if (!e) return;
+      e.alarm = i.checked; if (i.checked) { primeAudio(); lnInit(); fired.delete(e.id + "@" + e.start); }
+      persist(cur); renderCal(); renderHome();
+    }));
+  }
+  function openForm(id, start, end) {
+    const e = id ? (days[cur] || []).find((x) => x.id === id) : null;
+    editing = e ? e.id : null;
+    $("#ev-title").textContent = e ? "تعديل الموعد" : "موعد جديد";
+    $("#f-title").value = e ? e.title : "";
+    $("#f-start").value = e ? e.start : (start || "08:00");
+    $("#f-end").value = e ? e.end : (end || "09:00");
+    $("#f-cat").value = e ? (e.cat || "sport") : "sport";
+    $("#f-alarm").checked = e ? !!e.alarm : false;
+    $("#f-note").value = e ? (e.note || "") : "";
+    $("#f-save").textContent = e ? "حفظ التعديل" : "زيد";
+    $("#f-del").hidden = !e; $("#f-errs").innerHTML = "";
+    renderCal();
+    if (window.innerWidth < 900) $("#ev-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("#f-title").focus({ preventScroll: true });
+  }
+  $("#ev-new").addEventListener("click", () => openForm(null));
+  $("#f-cancel").addEventListener("click", () => { editing = null; openForm(null); });
+  $("#ev-form").addEventListener("submit", (x) => {
+    x.preventDefault();
+    const data = { title: $("#f-title").value.trim(), start: $("#f-start").value, end: $("#f-end").value, cat: $("#f-cat").value, alarm: $("#f-alarm").checked, note: $("#f-note").value.trim() };
+    const v = C.validateEvent(data);
+    if (!v.ok) { $("#f-errs").innerHTML = v.errors.map((t) => `<li>${t}</li>`).join(""); return; }
+    if (data.alarm) { primeAudio(); lnInit(); }
+    const list = days[cur] = days[cur] || [];
+    if (editing) { const e = list.find((y) => y.id === editing); Object.assign(e, data); fired.delete(e.id + "@" + e.start); }
+    else list.push({ id: "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), ...data });
+    persist(cur); editing = null; openForm(null); renderHome(); renderWeek();
+  });
+  $("#f-del").addEventListener("click", () => {
+    if (!editing) return;
+    if ($("#f-del").dataset.confirm !== "1") { $("#f-del").dataset.confirm = "1"; $("#f-del").textContent = "متأكد؟ ضغط مرة أخرى"; return; }
+    days[cur] = days[cur].filter((e) => e.id !== editing);
+    $("#f-del").dataset.confirm = ""; $("#f-del").textContent = "مسح";
+    persist(cur); editing = null; openForm(null); renderHome(); renderWeek();
+  });
+  async function openDay(k) { cur = k; editing = null; await loadDay(k); openForm(null); }
+  $("#d-prev").addEventListener("click", () => openDay(C.addDays(cur, -1)));
+  $("#d-next").addEventListener("click", () => openDay(C.addDays(cur, 1)));
+  $("#d-today").addEventListener("click", () => openDay(today()));
+  $("#d-pick").addEventListener("change", () => { if ($("#d-pick").value) openDay($("#d-pick").value); });
+  $("#d-copy").addEventListener("click", async () => {
+    const prev = await loadDay(C.addDays(cur, -1));
+    if (!prev.length) { $("#savestate").textContent = "البارح خاوي"; return; }
+    days[cur] = prev.map((e) => ({ ...e, id: "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) }));
+    persist(cur); renderCal(); renderHome(); renderWeek();
+  });
+
+  // ---------- Alarm (in-page)
+  const fired = new Set();
+  let actx = null;
+  function primeAudio() { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch (e) {} }
+  function beep() {
+    if (!actx) return;
+    try { [0, .35, .7].forEach((t) => { const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(actx.destination); g.gain.setValueAtTime(.0001, actx.currentTime + t); g.gain.exponentialRampToValueAtTime(.25, actx.currentTime + t + .02); g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + t + .28); o.start(actx.currentTime + t); o.stop(actx.currentTime + t + .3); }); } catch (e) {}
+  }
+  document.addEventListener("pointerdown", primeAudio, { once: true });
+  function checkAlarms() {
+    const list = days[today()] || [];
+    C.dueAlarms(list, nowMin(), fired).forEach((e) => {
+      fired.add(e.id + "@" + e.start); beep();
+      const t = $("#toast");
+      t.innerHTML = `<span style="font-size:1.4rem">⏰</span><div><b>${e.start}</b> · ${esc(e.title)}<div class="lbl">حتى ${e.end}</div></div><button class="btn" id="toast-x">مزيان</button>`;
+      t.hidden = false; $("#toast-x").addEventListener("click", () => (t.hidden = true));
+    });
+    const d = new Date(); $("#clock").textContent = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  }
+
+  // ---------- Dashboard
+  function renderHome() {
+    const ev = C.sortEvents(days[today()] || []), sum = C.summarizeEvents(ev), n = nowMin();
+    const next = ev.find((e) => C.toMin(e.end) > n);
+    $("#k-count").textContent = sum.count;
+    $("#k-next").textContent = next ? `الجاي: ${next.start} ${next.title}` : "ما بقا حتى موعد اليوم";
+    $("#k-hours").innerHTML = `${(sum.minutes / 60).toFixed(1)}<small> س / 16</small>`;
+    $("#k-hours-m").style.width = Math.min(100, (sum.minutes / 960) * 100) + "%";
+    $("#k-alarms").textContent = sum.alarms;
+    $("#nb-cal").textContent = sum.count || "";
+    $("#home-today").innerHTML = ev.length ? ev.map((e) => `<tr><td class="n">${e.start}–${e.end}</td><td>${esc(e.title)}</td><td>${catPill(e.cat)}</td><td>${e.alarm ? "⏰" : "—"}</td></tr>`).join("") : `<tr><td colspan="4" class="empty">ما كاين حتى موعد اليوم.</td></tr>`;
+  }
+  async function renderWeek() {
+    const d = parseKey(today()), start = C.addDays(today(), -d.getDay());
+    const keys = Array.from({ length: 7 }, (_, i) => C.addDays(start, i));
+    await Promise.all(keys.map((k) => loadDay(k)));
+    const data = keys.map((k) => C.summarizeEvents(days[k]));
+    const maxH = Math.max(4, Math.ceil(Math.max(...data.map((s) => s.minutes)) / 60 / 2) * 2);
+    const W = 560, H = 220, pl = 34, pb = 26, pt = 10, cw = (W - pl - 10) / 7, bw = cw * .52;
+    const y = (h) => pt + (H - pt - pb) * (1 - h / maxH);
+    let g = `<g class="grid">`;
+    for (let h = 0; h <= maxH; h += maxH / 4) g += `<line x1="${pl}" x2="${W - 6}" y1="${y(h)}" y2="${y(h)}"/><text x="${pl - 6}" y="${y(h) + 3}" text-anchor="end">${h}h</text>`;
+    g += `</g>`;
+    let bars = "";
+    keys.forEach((k, i) => {
+      // LTR chart: x position goes left→right Sunday→Saturday
+      const x = pl + i * cw + (cw - bw) / 2; let acc = 0;
+      CATS.concat([{ id: "autre", c: "var(--faint)" }]).forEach((c) => {
+        const m = data[i].byCat[c.id] || 0; if (!m) return;
+        const h0 = acc / 60, h1 = (acc + m) / 60; acc += m;
+        bars += `<rect x="${x}" y="${y(h1)}" width="${bw}" height="${Math.max(0, y(h0) - y(h1))}" fill="${c.c}" rx="2"><title>${fmtDay(k)} · ${(c.ar || "أخرى")}: ${fmtDur(m)}</title></rect>`;
+      });
+      const dd = parseKey(k);
+      bars += `<text x="${x + bw / 2}" y="${H - 8}" text-anchor="middle" ${k === today() ? 'style="fill:var(--accent)"' : ""}>${DAYS[dd.getDay()].replace("ال", "").slice(0, 3)} ${dd.getDate()}</text>`;
+    });
+    $("#wk-chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ساعات الأسبوع">${g}${bars}</svg>`;
+    $("#wk-legend").innerHTML = CATS.map((c) => `<span><i style="background:${c.c}"></i>${c.ar} <b class="num">${fmtDur(data.reduce((a, s) => a + (s.byCat[c.id] || 0), 0))}</b></span>`).join("");
+    $("#wk-range").textContent = `${fmtDay(keys[0])} → ${fmtDay(keys[6])}`;
+  }
+  $("#home-min").innerHTML = M.MINERALS.slice(0).sort((a, b) => ["fe", "mg", "zn", "ca", "k", "i"].indexOf(a.id) - ["fe", "mg", "zn", "ca", "k", "i"].indexOf(b.id)).filter((m) => ["fe", "mg", "zn", "ca", "k", "i"].includes(m.id)).map((m) => `<tr class="click" data-min="${m.id}">
+    <td><span class="sym ${m.group === "oligo" ? "o" : ""} lat">${m.sym}</span> ${esc(m.ar)}</td><td>${esc(m.need)}</td><td>${esc(m.sources.slice(0, 3).join("، "))}</td><td>${esc(m.deficiency[0])}</td></tr>`).join("");
+  $$("#home-min tr").forEach((tr) => tr.addEventListener("click", () => { go("min"); openMineral(tr.dataset.min); }));
+
+  // ---------- Minerals
+  let mg = "all", msel = null;
+  const norm = (t) => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  function renderMin() {
+    const q = norm($("#m-q").value).trim();
+    const list = M.MINERALS.filter((m) => (mg === "all" || m.group === mg) && (!q || norm([m.ar, m.fr, m.sym, ...m.sources, ...m.role, ...m.deficiency].join(" ")).includes(q)));
+    $("#m-count").textContent = `${list.length} / ${M.MINERALS.length}`;
+    $("#m-table").innerHTML = list.length ? list.map((m) => `<tr class="click ${msel === m.id ? "sel" : ""}" data-id="${m.id}">
+      <td style="white-space:nowrap"><span class="sym ${m.group === "oligo" ? "o" : ""} lat">${m.sym}</span> ${esc(m.ar)}<div class="lbl lat" style="text-align:right">${esc(m.fr)}</div></td>
+      <td><span class="pill ${m.group === "macro" ? "g" : "y"}">${m.group === "macro" ? "Macro" : "Oligo"}</span></td>
+      <td>${esc(m.role.slice(0, 2).join("، "))}</td><td>${esc(m.sources.slice(0, 3).join("، "))}</td>
+      <td>${esc(m.deficiency[0])}</td><td style="white-space:nowrap">${esc(m.need.split("(")[0])}</td></tr>`).join("")
+      : `<tr><td colspan="6" class="empty">ما لقينا والو.</td></tr>`;
+    $$("#m-table tr.click").forEach((tr) => tr.addEventListener("click", () => openMineral(tr.dataset.id)));
+  }
+  $("#m-q").addEventListener("input", renderMin);
+  $$("#v-min .seg button").forEach((b) => b.addEventListener("click", () => { mg = b.dataset.g; $$("#v-min .seg button").forEach((x) => x.setAttribute("aria-pressed", x === b)); renderMin(); }));
+  function openMineral(id) {
+    const m = M.MINERALS.find((x) => x.id === id); if (!m) return;
+    msel = id; renderMin();
+    const el = $("#m-detail"); el.hidden = false;
+    el.innerHTML = `<header><span class="sym ${m.group === "oligo" ? "o" : ""} lat" style="height:30px;min-width:40px;font-size:1rem">${m.sym}</span><h2>${esc(m.ar)} · <span class="lat muted">${esc(m.fr)}</span></h2><span class="pill n lat">Z = ${m.z}</span><button class="btn" id="m-close" style="margin-inline-start:auto">سد</button></header>
+      <div class="body flush tw"><table class="kv">
+        <tr><th>الحاجة اليومية</th><td><b>${esc(m.need)}</b></td></tr>
+        <tr><th>الفائدة فالجسم</th><td>${ul(m.role)}</td></tr>
+        <tr><th>منين تجيبو</th><td>${ul(m.sources)}</td></tr>
+        <tr class="def"><th>أضرار النقص</th><td>${ul(m.deficiency)}</td></tr>
+        <tr><th>شكون معرض للنقص</th><td>${ul(m.atRisk)}</td></tr>
+        <tr class="def"><th>الزيادة و UL</th><td>${esc(m.excess)}</td></tr>
+        <tr><th>المصدر</th><td><a class="lat" href="${esc(m.src)}" target="_blank" rel="noopener">${esc(m.src.replace("https://", ""))}</a> <span class="lbl">· مراجعة ${M.REVIEWED}</span></td></tr>
+      </table></div>`;
+    $("#m-close").addEventListener("click", () => { el.hidden = true; msel = null; renderMin(); });
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // ---------- Supplements
+  const KIND = { nutriment_essentiel: ["g", "Nutriment essentiel"], supplément_performance: ["y", "Performance"], protéine_alimentaire: ["b", "Protéine"], plante: ["n", "Plante"] };
+  const EV = { forte: ["g", "قوي"], modérée: ["b", "متوسط"], limitée: ["y", "محدود"], insuffisante: ["r", "ضعيف"] };
+  [...new Set(D.SUPPLEMENTS.map((s) => s.category))].forEach((c) => { const o = document.createElement("option"); o.value = c; o.textContent = c; $("#cat").appendChild(o); });
+  let ssel = null;
+  function renderSup() {
+    const list = C.searchSupplements(D.SUPPLEMENTS, $("#q").value, $("#cat").value);
+    $("#s-count").textContent = `${list.length} / ${D.SUPPLEMENTS.length}`;
+    $("#s-table").innerHTML = list.length ? list.map((s) => `<tr class="click ${ssel === s.id ? "sel" : ""}" data-id="${s.id}">
+      <td><b class="lat">${esc(s.name)}</b><div class="lbl">${esc(s.nameAr)}</div></td><td>${esc(s.category)}</td>
+      <td><span class="pill ${KIND[s.kind][0]}">${KIND[s.kind][1]}</span></td><td><span class="pill ${EV[s.evidence.level][0]}">${EV[s.evidence.level][1]}</span></td>
+      <td style="font-size:.8rem">${esc(s.studiedIntake)}</td></tr>`).join("") : `<tr><td colspan="5" class="empty">ما لقينا والو.</td></tr>`;
+    $$("#s-table tr.click").forEach((tr) => tr.addEventListener("click", () => openSup(tr.dataset.id)));
+  }
+  $("#q").addEventListener("input", renderSup); $("#cat").addEventListener("change", renderSup);
+  function openSup(id) {
+    const s = D.SUPPLEMENTS.find((x) => x.id === id); if (!s) return;
+    ssel = id; renderSup();
+    const f = (l, b, cls = "") => `<div class="fact ${cls}"><span class="lbl">${l}</span>${b}</div>`;
+    const el = $("#s-detail"); el.hidden = false;
+    el.innerHTML = `<header><h2><span class="lat">${esc(s.name)}</span> · ${esc(s.nameAr)}</h2><span class="pill ${KIND[s.kind][0]}">${KIND[s.kind][1]}</span><span class="pill ${EV[s.evidence.level][0]}">دليل ${EV[s.evidence.level][1]}</span><button class="btn" id="s-close" style="margin-inline-start:auto">سد</button></header>
+      <div class="body">
+        <p class="muted">${s.kind === "nutriment_essentiel" ? "عنصر ضروري: الماكلة هي المصدر الأول، والمكمل كيفيد ملي كاين نقص." : "مكمل اختياري: ماشي ضروري للصحة ولا كيعوض الماكلة."} ${esc(s.evidence.note)}.</p>
+        <div class="facts">
+          ${f("الاستعمال", `<p>${esc(s.intendedUse)}</p>`)}${f("Mécanisme d'action", `<p>${esc(s.mechanism)}</p>`)}
+          ${f("فوائد مثبتة", ul(s.benefits))}${f("ادعاءات غير مثبتة", ul(s.unproven))}
+          ${f("الكميات المدروسة", `<p>${esc(s.studiedIntake)}</p>`, "dose")}${f("Limite supérieure (UL)", `<p>${esc(s.upperLimit)}</p>`, "dose")}
+          ${f("شكون خاصو يتجنبو", ul(s.avoid), "alert")}${f("Interactions médicamenteuses", ul(s.interactions), "alert")}
+          ${f("Formes", ul(s.forms.map((x) => x.name + ": " + x.note)))}${f("Effets secondaires", ul(s.sideEffects))}
+          ${f("التوقيت", `<p>${esc(s.timing)}</p>`)}${f("Anti-dopage", `<p>${esc(s.antiDoping)}</p>`)}
+          ${f("خطر التلوث", `<p>${esc(s.contamination)}</p>`)}${f("تحليل أو تقييم طبي", `<p>${esc(s.clinicalCheck)}</p>`)}
+        </div>
+        <div style="display:grid;gap:4px;font-size:.82rem"><span class="lbl">المصادر · مراجعة ${esc(s.reviewedOn)}</span>${s.sources.map((x) => `<a class="lat" style="text-align:right" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`).join("")}</div>
+      </div>`;
+    $("#s-close").addEventListener("click", () => { el.hidden = true; ssel = null; renderSup(); });
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // ---------- Comparison
+  let ctype = "whey";
+  const MISS = `<span class="missing">غير متوفر</span>`;
+  const CERT = { "non_déclarée": ["n", "ما كاينش"], "déclarée_non_vérifiée": ["y", "Logo فقط، ما تأكدناش"], "vérifiée_source_officielle": ["g", "متأكد منها"] };
+  $$("#v-cmp .seg button").forEach((b) => b.addEventListener("click", () => { ctype = b.dataset.t; $$("#v-cmp .seg button").forEach((x) => x.setAttribute("aria-pressed", x === b)); renderCmp(); }));
+  function renderCmp() {
+    const ps = D.PRODUCTS.filter((p) => p.type === ctype).map((p) => ({ p, m: C.productMetrics(p), v: C.validateProduct(p) }));
+    const fmt = (v, u) => v == null ? MISS : `${v.toLocaleString("fr-MA")} ${u}`;
+    const best = (k, low = true) => { const vals = ps.map((x) => x.m[k]).filter((v) => v != null); if (vals.length < 2) return -1; const t = low ? Math.min(...vals) : Math.max(...vals); return ps.findIndex((x) => x.m[k] === t); };
+    const nr = (l, k, u, low = true) => { const b = best(k, low); return `<tr><th>${l}</th>${ps.map((x, i) => `<td class="n ${i === b ? "best" : ""}">${fmt(x.m[k], u)}</td>`).join("")}</tr>`; };
+    const rr = (l, fn) => `<tr><th>${l}</th>${ps.map((x) => `<td>${fn(x.p)}</td>`).join("")}</tr>`;
+    const yn = (v) => v === true ? `<span class="ok">نعم</span>` : v === false ? "لا" : MISS;
+    let rows = rr("الثمن", (p) => p.priceMAD != null ? `<span class="num">${p.priceMAD} MAD</span>` : MISS) + nr("عدد الـ portions", "servings", "", false) + nr("الثمن فالـ portion", "pricePerServing", "MAD");
+    rows += ctype === "whey"
+      ? rr("بروتين/portion", (p) => p.proteinPerServingG != null ? `<span class="num">${p.proteinPerServingG} g</span>` : MISS) + nr("تركيز البروتين", "proteinPct", "%", false) + nr("الثمن لكل 25 g بروتين", "pricePer25gProtein", "MAD")
+      : rr("Créatine/portion", (p) => p.creatinePerServingG != null ? `<span class="num">${p.creatinePerServingG} g</span>` : MISS) + nr("الثمن لكل 1 g", "pricePerGCreatine", "MAD");
+    rows += rr("السكر · kcal", (p) => `<span class="num">${p.sugarPerServingG ?? "?"} g · ${p.kcalPerServing ?? "?"}</span>`);
+    rows += rr("Allergènes", (p) => p.allergens.length ? esc(p.allergens.join("، ")) : "لا شيء");
+    rows += rr("Proprietary blend", (p) => p.proprietaryBlend ? `<span class="pill y">نعم</span>` : "لا") + rr("COA", (p) => yn(p.coaAvailable));
+    rows += rr("Certification", (p) => { const [c, t] = CERT[p.certification.status]; return `<span class="pill ${c}">${t}</span>${p.certification.program ? `<div class="lbl lat" style="text-align:right">${esc(p.certification.program)}</div>` : ""}`; });
+    rows += rr("GTIN", (p) => { if (!p.gtin) return MISS; const g = C.validateGTIN(p.gtin); return `<span class="num">${p.gtin}</span><div class="${g.valid ? "ok" : "warns"}" style="padding:0">${esc(g.reason)}</div>`; });
+    rows += rr("البائع", (p) => `${esc(p.seller)}<div class="lbl">Distributeur agréé: ${p.sellerAuthorized == null ? "غير معروف" : yn(p.sellerAuthorized)}</div>`);
+    rows += `<tr><th>تنبيهات</th>${ps.map((x) => `<td>${x.v.warnings.length ? `<ul class="warns">${x.v.warnings.map((w) => `<li>${esc(w)}</li>`).join("")}</ul>` : `<span class="ok">ما كاين حتى تنبيه</span>`}</td>`).join("")}</tr>`;
+    $("#cmp").innerHTML = `<thead><tr><th style="width:170px">المعيار</th>${ps.map((x) => `<th><span class="lat" style="color:var(--ink)">${esc(x.p.brand)}</span><div class="lat" style="text-align:right">${esc(x.p.name)}</div></th>`).join("")}</tr></thead><tbody>${rows}</tbody>`;
+    $$("#cmp tbody th").forEach((th) => { th.style.color = "var(--muted)"; th.style.fontWeight = "500"; th.style.background = "var(--panel-2)"; th.style.fontSize = ".8rem"; });
+  }
+
+  // ---------- Sources
+  const SRC = [["NIH Office of Dietary Supplements", "الحاجة اليومية، UL، أعراض النقص، التداخلات", "https://ods.od.nih.gov/"], ["ISSN — Position stands", "Créatine، protéines، caféine عند الرياضيين", "https://jissn.biomedcentral.com/"], ["EFSA", "حدود السلامة الأوروبية (UL، caféine)", "https://www.efsa.europa.eu/en/topics/topic/dietary-reference-values"], ["WADA — Prohibited List", "المواد الممنوعة فالرياضة", "https://www.wada-ama.org/en/prohibited-list"]];
+  $("#src-table").innerHTML = SRC.map(([t, d, u]) => `<tr><td class="lat" style="text-align:right"><b>${t}</b></td><td>${d}</td><td><a class="lat" href="${u}" target="_blank" rel="noopener">${u.replace("https://", "")}</a></td></tr>`).join("");
+
+  // ---------- Boot
+  async function boot() {
+    await loadDay(today()); await openDay(cur);
+    renderHome(); renderWeek(); renderMin(); renderSup(); renderCmp(); checkAlarms();
+    if (NATIVE) {
+      $("#alarm-note").textContent = "المنبه كيرن فالتيليفون فساعة البداية، حتى والتطبيق مسدود. أول مرة غادي يطلب منك الإذن ديال Notifications.";
+      $$(".kpi .d").forEach((d) => { if (d.textContent.includes("محلولة")) d.textContent = "كيرنو حتى والتطبيق مسدود"; });
+      syncNativeAhead();
+    }
+  }
+  boot();
+  setInterval(() => { checkAlarms(); if (cur === today() && !$("#v-cal").hidden) renderCal(); renderHome(); }, 20000);
+  go(store.get("supp-tab") || "home");
+  (async () => {
+    try {
+      if (!window.claude || !window.claude.use) return;
+      const [dbn, usr] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+      if (!dbn || !usr) return;
+      const id = await usr.id(); if (!id) return;
+      db = dbn; uid = id;
+      for (const k of Object.keys(days)) {
+        const mine = days[k];
+        const remote = await loadDay(k, true);
+        if (!remote.length && mine.length) { days[k] = mine; persist(k); }
+      }
+      await openDay(cur); renderHome(); renderWeek();
+      $("#savestate").textContent = "متزامن مع حسابك";
+    } catch (e) {}
+  })();
+})();
+</script>

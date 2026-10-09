@@ -1,0 +1,13 @@
+{
+  "appId": "ma.supplements.app",
+  "appName": "دليل المكملات",
+  "webDir": "www",
+  "android": {
+    "adjustMarginsForEdgeToEdge": "auto"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#4ADE80"
+    }
+  }
+}
