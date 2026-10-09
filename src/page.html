@@ -250,7 +250,10 @@ details.grp > summary .bar i { display: block; height: 100%; }
 .today-item { display: grid; grid-template-columns: auto 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--line); }
 .today-item:last-child { border-bottom: 0; }
 .today-item .tm { font-family: var(--mono); color: var(--sky); direction: ltr; }
-.today-item .nm { min-width: 0; }
+.today-item .nm { min-width: 0; background: none; border: 0; padding: 0; text-align: start; cursor: pointer; color: inherit; font: inherit; }
+.today-item.open .nm .lbl { white-space: normal; overflow: visible; color: var(--ink); background: var(--panel-2); border-radius: 6px; padding: 6px 8px; margin-top: 4px; line-height: 1.6; }
+.today-item.leaving { opacity: 0; transform: translateX(-12px); transition: opacity .4s, transform .4s; }
+.link-btn { background: none; border: 0; color: var(--muted); font-size: .8rem; padding: 10px 14px; cursor: pointer; text-decoration: underline; justify-self: start; }
 .today-item .nm .lbl { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .today-item.done .nm b { text-decoration: line-through; color: var(--muted); }
 .today-item input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); }
@@ -1056,19 +1059,28 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     }).join("") : `<tr><td colspan="5" class="empty">لا توجد أدوية أو مكملات. أضفها من النموذج أدناه.</td></tr>`;
     $$("#md-table tr.click").forEach((tr) => tr.addEventListener("click", () => openMed(tr.dataset.id)));
   }
+  let showDoneRoutine = false;
+  const openRoutine = new Set();
   function renderHomeRoutine() {
-    const k = today(), list = C.routineFor(meals.filter((m) => m.food || m.alarm), meds, k), tk = getTaken(k);
-    $("#home-routine").hidden = !list.length;
-    const done = list.filter((x) => tk[x.key]).length;
-    $("#home-routine-sum").textContent = list.length ? `${done}/${list.length}` : "";
+    const k = today(), all = C.routineFor(meals.filter((m) => m.food || m.alarm), meds, k), tk = getTaken(k);
+    const done = all.filter((x) => tk[x.key]).length, list = showDoneRoutine ? all : all.filter((x) => !tk[x.key]);
+    $("#home-routine").hidden = !all.length;
+    $("#home-routine-sum").textContent = all.length ? `${done}/${all.length}` : "";
     const n = nowMin();
-    $("#home-routine-list").innerHTML = list.map((x, i) => `<label class="today-item ${tk[x.key] ? "done" : ""}">
-      <input type="checkbox" data-rk="${esc(x.key)}" ${tk[x.key] ? "checked" : ""} aria-label="${x.kind === "med" ? "تم التناول" : "تم"}">
+    $("#home-routine-list").innerHTML = (list.length ? list.map((x) => `<div class="today-item ${tk[x.key] ? "done" : ""} ${openRoutine.has(x.key) ? "open" : ""}" data-rkey="${esc(x.key)}">
+      <input type="checkbox" data-rk="${esc(x.key)}" ${tk[x.key] ? "checked" : ""} aria-label="${x.kind === "med" ? "تم التناول" : "انتهيت من الوجبة"}">
       <span class="tm">${x.time}</span>
-      <span class="nm"><b>${x.kind === "med" ? "💊 " : "🍽 "}${esc(x.name)}</b>${x.detail ? `<span class="lbl">${esc(x.detail)}</span>` : ""}</span>
+      <button type="button" class="nm" data-open="${esc(x.key)}" aria-expanded="${openRoutine.has(x.key)}"><b>${x.kind === "med" ? "💊 " : "🍽 "}${esc(x.name)}</b>${x.detail ? `<span class="lbl">${esc(x.detail)}</span>` : (x.kind === "meal" ? `<span class="lbl">لم تحدد محتوى الوجبة</span>` : "")}</button>
       ${!tk[x.key] && C.toMin(x.time) < n ? `<span class="pill y">فات</span>` : x.alarm ? `<span class="lbl">🔔</span>` : `<span></span>`}
-    </label>`).join("");
-    $$("#home-routine-list [data-rk]").forEach((c) => c.addEventListener("change", () => { setTaken(k, c.dataset.rk, c.checked); renderHomeRoutine(); renderMeds(); }));
+    </div>`).join("") : `<p class="empty">أنهيت كل شيء لليوم ✓</p>`)
+      + (done ? `<button type="button" class="link-btn" id="rt-toggle">${showDoneRoutine ? "إخفاء المنتهية" : `عرض المنتهية (${done})`}</button>` : "");
+    $$("#home-routine-list [data-rk]").forEach((c) => c.addEventListener("change", () => {
+      setTaken(k, c.dataset.rk, c.checked); renderMeds();
+      const row = c.closest(".today-item"); row.classList.toggle("done", c.checked);
+      if (c.checked && !showDoneRoutine) { row.classList.add("leaving"); setTimeout(renderHomeRoutine, 450); } else renderHomeRoutine();
+    }));
+    $$("#home-routine-list [data-open]").forEach((bt) => bt.addEventListener("click", () => { const key = bt.dataset.open; openRoutine.has(key) ? openRoutine.delete(key) : openRoutine.add(key); renderHomeRoutine(); }));
+    const tg = $("#rt-toggle"); if (tg) tg.addEventListener("click", () => { showDoneRoutine = !showDoneRoutine; renderHomeRoutine(); });
   }
   // Pseudo-events for the in-page alarm (web / app open)
   const routineEvents = () => C.routineFor(meals, meds, today()).filter((x) => x.alarm).map((x) => ({ id: x.key, title: (x.kind === "med" ? "💊 " : "🍽 ") + x.name + (x.detail ? " · " + x.detail : ""), start: x.time, end: x.time, alarm: true, alarmAt: x.time, tone: x.kind === "med" ? "bell" : "soft" }));
