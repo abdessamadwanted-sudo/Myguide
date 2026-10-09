@@ -54,6 +54,12 @@ jobs:
           cp sounds/*.wav android/app/src/main/res/raw/
           ls android/app/src/main/res/raw
 
+      - name: Native code (ToneKit plugin)
+        run: |
+          D=android/app/src/main/java/ma/supplements/app
+          ls $D
+          cp native/*.java $D/
+
       - name: Sync
         run: npx cap sync android
 

@@ -140,6 +140,11 @@
     if (s === null) errors.push("يجب أن تكون ساعة البداية بصيغة 08:30");
     if (f === null) errors.push("يجب أن تكون ساعة النهاية بصيغة 09:30");
     if (s !== null && f !== null && f <= s) errors.push("يجب أن تكون ساعة النهاية بعد ساعة البداية");
+    if (e && e.alarm && e.alarmAt) {
+      const t = toMin(e.alarmAt);
+      if (t === null) errors.push("وقت المنبه غير صحيح");
+      else if (f !== null && t > f) errors.push("يجب أن يكون وقت المنبه قبل نهاية الموعد");
+    }
     return { ok: errors.length === 0, errors };
   }
   const duration = (e) => { const s = toMin(e.start), f = toMin(e.end); return s !== null && f !== null && f > s ? f - s : 0; };
@@ -162,15 +167,28 @@
       id: "m" + h, title: slots[h].text, start: h + ":00", end: fromMin(Math.min(toMin(h + ":00") + 60, 23 * 60 + 59)), cat: slots[h].cat || "", alarm: false, note: "",
     }));
   }
-  // Minute de déclenchement de l'alarme : début − rappel (peut être négatif = la veille)
+  // Heure exacte de l'alarme : alarmAt (HH:MM) sinon début − rappel (ancien format)
   const REMIND = [0, 5, 10, 15, 30, 60];
-  const alarmMin = (e) => { const s = toMin(e.start); return s === null ? null : s - (Number(e.remind) || 0); };
-  // Alarmes à déclencher maintenant (minute atteinte, pas encore déclenchée)
+  const EVERY = [0, 5, 10, 15, 20, 30, 60];
+  const alarmMin = (e) => {
+    if (e.alarmAt && toMin(e.alarmAt) !== null) return toMin(e.alarmAt);
+    const s = toMin(e.start); return s === null ? null : s - (Number(e.remind) || 0);
+  };
+  // Toutes les minutes de sonnerie : heure exacte + répétition toutes les N minutes jusqu'à la fin du rendez-vous
+  function alarmTimes(e) {
+    const a = alarmMin(e); if (a === null) return [];
+    const out = [a], every = Number(e.alarmEvery) || 0, end = toMin(e.end);
+    if (every > 0 && end !== null) for (let t = a + every; t < end && out.length < 48; t += every) out.push(t);
+    return out;
+  }
+  // Alarmes à déclencher maintenant : renvoie {..., _at} pour chaque sonnerie atteinte et pas encore déclenchée
   function dueAlarms(list, nowMin, fired) {
-    return (list || []).filter((e) => {
-      const a = alarmMin(e);
-      return e.alarm && a !== null && a >= 0 && nowMin >= a && nowMin - a < 2 && !fired.has(e.id + "@" + e.start + "-" + (e.remind || 0));
+    const out = [];
+    (list || []).forEach((e) => {
+      if (!e.alarm) return;
+      alarmTimes(e).forEach((t) => { if (t >= 0 && nowMin >= t && nowMin - t < 2 && !fired.has(e.id + "@" + t)) out.push({ ...e, _at: t }); });
     });
+    return out;
   }
   // Répétition : none | daily | weekdays (lun–ven) | weekly (même jour que « since »)
   const REPEAT = ["none", "daily", "weekdays", "weekly"];
@@ -182,17 +200,20 @@
     if (r.repeat === "weekly") return wd(key) === wd(r.since);
     return false;
   }
-  // Créneaux hebdomadaires de l'alarme (pour une notification répétée) : [{weekday 1=dim..7=sam | null, hour, minute}]
+  // Créneaux hebdomadaires des sonneries (notifications répétées) : [{weekday 1=dim..7=sam | null, hour, minute}]
   function repeatSlots(r) {
-    let a = alarmMin(r); if (a === null) return [];
-    let shift = 0; if (a < 0) { a += 1440; shift = -1; }
-    const hour = Math.floor(a / 60), minute = a % 60;
-    const wdOf = (js) => ((((js + shift) % 7) + 7) % 7) + 1;
-    if (r.repeat === "daily") return [{ weekday: null, hour, minute }];
-    if (r.repeat === "weekdays") return [1, 2, 3, 4, 5].map((js) => ({ weekday: wdOf(js), hour, minute }));
-    if (r.repeat === "weekly") { const [y, m, d] = r.since.split("-").map(Number); return [{ weekday: wdOf(new Date(y, m - 1, d).getDay()), hour, minute }]; }
-    return [];
+    const out = [];
+    alarmTimes(r).forEach((a0) => {
+      let a = a0, shift = 0; if (a < 0) { a += 1440; shift = -1; }
+      const hour = Math.floor(a / 60), minute = a % 60;
+      const wdOf = (js) => ((((js + shift) % 7) + 7) % 7) + 1;
+      if (r.repeat === "daily") out.push({ weekday: null, hour, minute });
+      else if (r.repeat === "weekdays") [1, 2, 3, 4, 5].forEach((js) => out.push({ weekday: wdOf(js), hour, minute }));
+      else if (r.repeat === "weekly") { const [y, m, d] = r.since.split("-").map(Number); out.push({ weekday: wdOf(new Date(y, m - 1, d).getDay()), hour, minute }); }
+    });
+    return out;
   }
+
 
   // ---- Dépenses
   const parseAmount = (v) => { const n = parseFloat(String(v ?? "").replace(/\s/g, "").replace(",", ".")); return Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN; };
@@ -272,6 +293,13 @@
   // ---- Profil corporel : IMC (OMS), Mifflin-St Jeor, besoins énergétiques, eau (EFSA)
   const ACTIVITY = { sedentaire: 1.2, leger: 1.375, modere: 1.55, actif: 1.725, tres_actif: 1.9 };
   const GOAL_DELTA = { perte: -400, maintien: 0, prise: 400 };
+  // Âge révolu à partir de la date de naissance (YYYY-MM-DD)
+  function ageFrom(birth, today) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birth || "") || !/^\d{4}-\d{2}-\d{2}$/.test(today || "")) return NaN;
+    const [by, bm, bd] = birth.split("-").map(Number), [ty, tm, td] = today.split("-").map(Number);
+    let a = ty - by; if (tm < bm || (tm === bm && td < bd)) a--;
+    return a;
+  }
   function validateProfile(p) {
     const errors = [];
     const n = (v) => typeof v === "number" && Number.isFinite(v);
@@ -314,7 +342,7 @@
     return "next";
   }
 
-  const api = { parseAmount, monthOf, addMonths, validateExpense, expenseSummary, recentItems, dayDiff, validateBill, billDue, upcomingBills, REMIND, REPEAT, alarmMin, occursOn, repeatSlots, ACTIVITY, validateProfile, bmiCategory, bodyStats, TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
+  const api = { parseAmount, monthOf, addMonths, validateExpense, expenseSummary, recentItems, dayDiff, validateBill, billDue, upcomingBills, REMIND, EVERY, REPEAT, alarmMin, alarmTimes, ageFrom, occursOn, repeatSlots, ACTIVITY, validateProfile, bmiCategory, bodyStats, TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.SuppCore = api;
 })(typeof window !== "undefined" ? window : globalThis);

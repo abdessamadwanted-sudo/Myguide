@@ -86,15 +86,18 @@ test("Calendrier: alarmes dues une seule fois", () => {
   const ev = [{ id: "a", start: "07:00", end: "07:30", alarm: true }, { id: "b", start: "07:00", end: "08:00", alarm: false }];
   const fired = new Set();
   assert.equal(C.dueAlarms(ev, 420, fired).length, 1);
-  fired.add("a@07:00-0");
+  fired.add("a@420");
   assert.equal(C.dueAlarms(ev, 420, fired).length, 0);
   assert.equal(C.dueAlarms(ev, 430, new Set()).length, 0);
 });
-test("Alarme: rappel X minutes avant", () => {
-  const e = { id: "g", start: "18:00", end: "19:00", alarm: true, remind: 15 };
-  assert.equal(C.alarmMin(e), 17 * 60 + 45);
-  assert.equal(C.dueAlarms([e], C.toMin("17:45"), new Set()).length, 1);
-  assert.equal(C.dueAlarms([e], C.toMin("18:00"), new Set()).length, 0);
+test("Alarme: heure exacte dans le rendez-vous + répétition jusqu'à la fin", () => {
+  const e = { id: "g", start: "08:00", end: "09:00", alarm: true, alarmAt: "08:20", alarmEvery: 15 };
+  assert.deepEqual(C.alarmTimes(e).map(C.fromMin), ["08:20", "08:35", "08:50"]);
+  const due = C.dueAlarms([e], C.toMin("08:35"), new Set(["g@500"]));
+  assert.deepEqual(due.map((x) => x._at), [515]);
+  assert.equal(C.validateEvent({ ...e, title: "x", alarmAt: "09:30" }).ok, false);
+  // ancien format (rappel X minutes avant) toujours compris
+  assert.equal(C.alarmMin({ start: "18:00", remind: 15 }), 17 * 60 + 45);
 });
 test("Répétition: tous les jours, jours ouvrables, chaque semaine", () => {
   const d = { repeat: "daily", since: "2026-10-09" };
@@ -110,6 +113,7 @@ test("Répétition: tous les jours, jours ouvrables, chaque semaine", () => {
 });
 test("Répétition: créneaux de notification hebdomadaires", () => {
   assert.deepEqual(C.repeatSlots({ repeat: "daily", start: "06:30", remind: 10 }), [{ weekday: null, hour: 6, minute: 20 }]);
+  assert.deepEqual(C.repeatSlots({ repeat: "daily", start: "06:00", end: "07:00", alarmAt: "06:30", alarmEvery: 20 }), [{ weekday: null, hour: 6, minute: 30 }, { weekday: null, hour: 6, minute: 50 }]);
   const wk = C.repeatSlots({ repeat: "weekdays", start: "08:00", remind: 0 });
   assert.deepEqual(wk.map((s) => s.weekday), [2, 3, 4, 5, 6]); // lun..ven (1 = dimanche)
   // 00:10 avec rappel 30 min → 23:40 la veille
@@ -143,6 +147,11 @@ test("Profil: Mifflin-St Jeor + activité + objectif", () => {
   const f = C.bodyStats({ heightCm: 165, weightKg: 58, age: 30, sex: "f", activity: "sedentaire", goal: "maintien" });
   assert.equal(f.bmr, 1300);
   assert.equal(f.waterL, 2.0);
+});
+test("Profil: âge à partir de la date de naissance", () => {
+  assert.equal(C.ageFrom("1996-10-10", "2026-10-09"), 29);
+  assert.equal(C.ageFrom("1996-10-09", "2026-10-09"), 30);
+  assert.ok(Number.isNaN(C.ageFrom("", "2026-10-09")));
 });
 test("Profil: valeurs invalides refusées, mineurs exclus", () => {
   assert.equal(C.bodyStats({ heightCm: 175, weightKg: 60, age: 16, sex: "h", activity: "modere" }), null);
