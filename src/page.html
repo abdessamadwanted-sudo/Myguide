@@ -185,6 +185,18 @@ td.best { color: var(--accent); font-weight: 600; }
 html[dir="ltr"] .side { right: auto; left: 0; border-left: 0; border-right: 1px solid var(--line); }
 @media (min-width: 960px) { html[dir="ltr"] .main { margin-right: 0; margin-left: 248px; } }
 @media (max-width: 959px) { html[dir="ltr"] .side { transform: translateX(-100%); } html[dir="ltr"] .side.open { transform: none; } }
+/* Shopping list */
+.shop-add { display: grid; grid-template-columns: minmax(0, 1fr) 90px auto; gap: 8px; }
+.shop-add input { min-width: 0; width: 100%; }
+.shop-list { display: grid; gap: 6px; }
+.shop-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--panel-2); border-radius: 10px; padding: 8px 10px; border-inline-start: 3px solid var(--gc, var(--warn)); }
+.shop-item .nm b { font-weight: 600; }
+.shop-item .nm .lbl { display: block; }
+.shop-item .buy { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--accent); background: none; color: var(--accent); cursor: pointer; font-size: 1rem; display: grid; place-items: center; }
+.shop-item .buy:hover { background: var(--accent-dim); }
+.shop-pay { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 6px; }
+.shop-pay input, .shop-pay select { min-width: 0; width: 100%; }
+.shop-item.done { opacity: 0; transform: translateX(-12px); transition: opacity .35s, transform .35s; }
 /* Expenses */
 .m-label { min-width: 120px; text-align: center; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -320,6 +332,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
 .toast { position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 50; background: var(--panel); border: 1px solid var(--c3); border-radius: 10px; padding: 12px 16px; display: flex; gap: 12px; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,.6); max-width: calc(100% - 32px); }
 .toast b { color: var(--c3); }
 .toast { flex-wrap: wrap; width: min(440px, calc(100% - 32px)); }
+@media (max-width: 480px) { .crumb { display: none; } }
 .savestate { font-size: .72rem; color: var(--faint); max-width: 34vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .clock { display: inline-flex; align-items: center; gap: 8px; direction: ltr; border: 1px solid color-mix(in srgb, var(--sky) 55%, transparent); background: color-mix(in srgb, var(--sky) 8%, transparent); border-radius: 8px; padding: 4px 10px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sky) 6%, transparent); }
 .clock .t { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 1.05rem; font-weight: 500; color: var(--sky); letter-spacing: .02em; line-height: 1.2; }
@@ -359,6 +372,8 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   <section class="page view" id="v-home">
     <div class="panel" id="home-bills" hidden><header><h2>🔔 فواتير يجب أداؤها</h2><button class="btn" data-go="bills">كل الفواتير</button></header>
       <div class="due-list" id="home-bills-list"></div></div>
+    <div class="panel" id="home-shop" hidden><header><h2>🛒 للشراء</h2><button class="btn" data-go="shop">القائمة</button></header>
+      <div class="body" style="padding:10px 12px"><div class="shop-list" id="home-shop-list"></div></div></div>
     <div class="panel" id="home-routine" hidden><header><h2>🍽 الوجبات والأدوية اليوم</h2><span class="lbl" id="home-routine-sum"></span></header>
       <div class="today-list" id="home-routine-list"></div></div>
     <div class="kpis">
@@ -508,6 +523,17 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       <div class="kpi"><span class="lbl">المعدل اليومي</span><span class="v" id="x-avg">0</span><span class="d">في هذا الشهر</span></div>
       <div class="kpi"><span class="lbl">أكبر فئة</span><span class="v" id="x-top" style="font-family:var(--body);font-size:1.1rem">—</span><span class="d" id="x-top-d"></span></div>
     </div>
+    <div class="panel" id="shop-panel"><header><h2>🛒 للشراء</h2><span class="lbl" id="shop-count"></span></header>
+      <div class="body" style="gap:10px">
+        <form class="shop-add" id="shop-form" novalidate>
+          <input type="text" id="shop-name" list="shop-sugg" placeholder="ماذا نفد؟ مثال: بطاطس، لحم، حليب" maxlength="50" aria-label="المادة">
+          <input type="text" id="shop-qty" placeholder="الكمية" maxlength="20" aria-label="الكمية">
+          <button type="submit" class="btn pri">+ أضف</button>
+        </form>
+        <datalist id="shop-sugg"></datalist>
+        <div class="chips" id="shop-quick"></div>
+        <div class="shop-list" id="shop-list"></div>
+      </div></div>
     <div class="panel" id="x-panel"><header><h2 id="x-form-title">إضافة مصروف</h2></header>
       <div class="body">
         <form class="form" id="x-form" novalidate>
@@ -662,6 +688,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   const navStack = [];
   let curTab = "home";
   function go(tab, fromBack) {
+    if (tab === "shop") { go("exp", fromBack); setTimeout(() => { const s = document.getElementById("shop-panel"); if (s) s.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); return; }
     if (tab === "bills") { go("exp", fromBack); setTimeout(() => { const s = document.getElementById("bills-sec"); if (s) s.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); return; }
     if (!TITLES[tab]) tab = "home";
     if (!fromBack && tab !== curTab) { navStack.push(curTab); if (navStack.length > 30) navStack.shift(); }
@@ -1202,6 +1229,8 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     $("#clock-d").textContent = `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
   }
   tickClock(); setInterval(tickClock, 1000);
+  // save/status message clears itself after a few seconds
+  { let t = null; const ss = $("#savestate"); new MutationObserver(() => { clearTimeout(t); if (ss.textContent) t = setTimeout(() => { ss.textContent = ""; }, 4000); }).observe(ss, { childList: true, characterData: true, subtree: true }); }
   // height of the sticky top bar, so pinned headers sit right under it
   const setTbh = () => { const tb = document.querySelector(".topbar"); if (tb) document.documentElement.style.setProperty("--tbh", tb.getBoundingClientRect().height + "px"); };
   setTbh(); window.addEventListener("resize", setTbh);
@@ -1521,6 +1550,73 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       : `<p class="muted">لا توجد مصاريف مسجلة هذا الشهر. أضفها من صفحة «المصاريف».</p>`;
   }
 
+  // ---------- Shopping list (things that ran out → reminder until bought)
+  let shop = jget("shop", []);           // [{id, name, qty, sub, added}]
+  let shopHist = jget("shop-hist", {});  // name(lower) -> {name, sub, price, times}
+  let shopPaying = null;
+  const saveShop = () => { store.set("shop", JSON.stringify(shop)); store.set("shop-hist", JSON.stringify(shopHist)); };
+  const SHOP_GUESS = [
+    [/بطاط|طماط|بصل|جزر|خيار|فلفل|كرعة|قرع|لوبيا|خضر|ثوم|معدنوس|قزبر|patate|tomate|oignon|carotte|légume|potato|tomato|onion|carrot|vegetable|verdura|patata/i, "veg"],
+    [/موز|تفاح|برتقال|ليمون|عنب|فراول|بطيخ|دلاح|فواك|fruit|banane|pomme|orange|banana|apple|fruta|manzana/i, "fruit"],
+    [/لحم|دجاج|دجاجة|حوت|سمك|سردين|كفت|ديك|viande|poulet|poisson|meat|chicken|fish|carne|pollo|pescado/i, "meat"],
+    [/حليب|بيض|جبن|فرماج|ياغورت|رايب|زبد|lait|œuf|oeuf|fromage|yaourt|milk|egg|cheese|yogurt|leche|huevo|queso/i, "dairy"],
+    [/خبز|دقيق|فرينة|سميد|أرز|روز|معكرون|شعرية|pain|farine|riz|pâtes|bread|flour|rice|pasta|pan|harina|arroz/i, "bread"],
+    [/صابون|شامبو|معجون|غسول|منظف|جافيل|savon|shampo|dentifrice|soap|shampoo|toothpaste|jabón|champú/i, "hygiene"],
+    [/دواء|كينة|أقراص|médicament|medicine|medicamento/i, "pharmacy"],
+  ];
+  function guessSub(name) {
+    const h = shopHist[name.trim().toLowerCase()]; if (h && h.sub) return h.sub;
+    for (const [re, sub] of SHOP_GUESS) if (re.test(name)) return sub;
+    return "grocery";
+  }
+  function addShop(name, qty) {
+    name = String(name || "").trim(); if (!name) return;
+    if (shop.some((s) => s.name.trim().toLowerCase() === name.toLowerCase())) { $("#savestate").textContent = "موجود في القائمة"; return; }
+    shop.push({ id: newId(), name, qty: String(qty || "").trim(), sub: guessSub(name), added: today() });
+    saveShop(); renderShop(); $("#savestate").textContent = "أُضيف إلى قائمة الشراء ✓";
+  }
+  function shopItemsHtml(compact) {
+    const tree = expTree();
+    const colOf = (sub) => (tree.find((g) => g.subs.some((s) => s.id === sub)) || { col: "var(--warn)" }).col;
+    return shop.map((s) => `<div class="shop-item" data-sid="${s.id}" style="--gc:${colOf(s.sub)}">
+      <button type="button" class="buy" data-buy="${s.id}" aria-label="اشتريته">✓</button>
+      <span class="nm"><b>${esc(s.name)}</b>${s.qty ? ` <span class="pill n">${esc(s.qty)}</span>` : ""}${compact ? "" : `<span class="lbl">${esc(subName(s.sub))}${s.added !== today() ? " · " + fmtDate(s.added) : ""}</span>`}</span>
+      ${compact ? "<span></span>" : `<button type="button" class="x-del" data-rmshop="${s.id}" aria-label="حذف">×</button>`}
+      ${shopPaying === s.id ? `<div class="shop-pay"><input type="text" inputmode="decimal" placeholder="الثمن (اختياري)" value="${shopHist[s.name.toLowerCase()] && shopHist[s.name.toLowerCase()].price ? String(shopHist[s.name.toLowerCase()].price).replace(".", ",") : ""}" aria-label="الثمن">
+        <select aria-label="الفئة"></select><button type="button" class="btn pri" data-paid="${s.id}">تم الشراء</button><button type="button" class="btn" data-paycancel="1">إلغاء</button></div>` : ""}
+    </div>`).join("");
+  }
+  function bindShop(root) {
+    $$(root + " [data-buy]").forEach((b) => b.addEventListener("click", () => { shopPaying = shopPaying === b.dataset.buy ? null : b.dataset.buy; renderShop(); const i = b.closest(".shop-list") && b.closest(".shop-list").querySelector(".shop-pay input"); if (i) i.focus(); }));
+    $$(root + " [data-rmshop]").forEach((b) => b.addEventListener("click", () => { shop = shop.filter((s) => s.id !== b.dataset.rmshop); saveShop(); renderShop(); }));
+    $$(root + " [data-paycancel]").forEach((b) => b.addEventListener("click", () => { shopPaying = null; renderShop(); }));
+    $$(root + " .shop-pay select").forEach((sel) => { const s = shop.find((x) => x.id === sel.closest(".shop-item").dataset.sid); fillSubSelect(sel, s ? s.sub : "grocery"); });
+    $$(root + " [data-paid]").forEach((b) => b.addEventListener("click", () => {
+      const s = shop.find((x) => x.id === b.dataset.paid); if (!s) return;
+      const rowEl = b.closest(".shop-item"), price = C.parseAmount((rowEl.querySelector("input") || {}).value), sub = (rowEl.querySelector("select") || {}).value || s.sub;
+      const key = s.name.toLowerCase(), h = shopHist[key] || { name: s.name, times: 0 };
+      shopHist[key] = { name: s.name, sub, price: price > 0 ? price : h.price, times: (h.times || 0) + 1 };
+      if (price > 0) { expenses.push({ id: newId(), date: today(), sub, item: subName(sub), amount: price, note: s.name + (s.qty ? " · " + s.qty : "") }); saveExp(); renderExp(); renderHomeExp(); }
+      const row = b.closest(".shop-item"); if (row) row.classList.add("done");
+      shop = shop.filter((x) => x.id !== s.id); shopPaying = null; saveShop();
+      $("#savestate").textContent = price > 0 ? `اشتُري «${s.name}» · ${fmtDH(price)} درهم ✓` : `اشتُري «${s.name}» ✓`;
+      setTimeout(renderShop, 350);
+    }));
+  }
+  function renderShop() {
+    $("#shop-count").textContent = shop.length ? `${shop.length}` : "";
+    $("#shop-list").innerHTML = shop.length ? shopItemsHtml(false) : `<p class="lbl">لا شيء للشراء الآن. عندما ينفد شيء، أضفه هنا ليذكّرك في لوحة القيادة.</p>`;
+    bindShop("#shop-list");
+    const freq = Object.values(shopHist).filter((h) => !shop.some((s) => s.name.toLowerCase() === h.name.toLowerCase())).sort((a, b) => (b.times || 0) - (a.times || 0)).slice(0, 10);
+    $("#shop-quick").innerHTML = freq.length ? `<span class="lbl" style="align-self:center">نفد مرة أخرى:</span>` + freq.map((h) => `<button type="button" class="chip-btn" data-again-shop="${esc(h.name)}">+ ${esc(h.name)}</button>`).join("") : "";
+    $$("#shop-quick [data-again-shop]").forEach((b) => b.addEventListener("click", () => addShop(b.dataset.againShop)));
+    $("#shop-sugg").innerHTML = Object.values(shopHist).map((h) => `<option value="${esc(h.name)}"></option>`).join("");
+    $("#home-shop").hidden = !shop.length;
+    $("#home-shop-list").innerHTML = shopItemsHtml(true); bindShop("#home-shop-list");
+    const nb = document.getElementById("nb-exp"); if (nb && shop.length) nb.textContent = (nb.textContent.includes("🔔") ? nb.textContent.split(" ")[0] + " " : "") + "🛒" + shop.length;
+  }
+  $("#shop-form").addEventListener("submit", (e) => { e.preventDefault(); addShop($("#shop-name").value, $("#shop-qty").value); $("#shop-name").value = ""; $("#shop-qty").value = ""; $("#shop-name").focus(); });
+
   // ---------- Bills / recurring payments
   let bills = jget("bills", []);
   const saveBills = () => { store.set("bills", JSON.stringify(bills)); syncBillsNative(); setTimeout(renderExp, 0); };
@@ -1637,7 +1733,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   async function boot() {
     await loadDay(today()); await openDay(cur);
     renderHome(); renderWeek(); renderMin(); renderSup(); renderCmp(); checkAlarms();
-    renderMeals(); openMed(null); renderHomeRoutine();
+    renderMeals(); openMed(null); renderHomeRoutine(); renderShop();
     fillSubSelect($("#x-sub"), store.get("exp-last-sub") || ""); if (!store.get("exp-last-sub")) $("#x-sub").value = ""; showChosen(); $("#x-date").value = today(); renderAgain(); renderExp(); renderHomeExp(); openBill(null);
     if (NATIVE) {
       $("#alarm-note").textContent = "يرنّ المنبه في الهاتف عند ساعة البداية حتى لو كان التطبيق مغلقًا. في المرة الأولى سيطلب منك التطبيق إذن الإشعارات.";

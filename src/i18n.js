@@ -156,6 +156,12 @@
     "التأمين": ["Assurance", "Insurance", "Seguros"], "التأمين الصحي": ["Assurance santé", "Health insurance", "Seguro médico"], "تأمين السيارة": ["Assurance auto", "Car insurance", "Seguro del coche"], "تأمينات أخرى": ["Autres assurances", "Other insurance", "Otros seguros"],
     "أخرى": ["Autres", "Other", "Otros"], "الملابس": ["Vêtements", "Clothes", "Ropa"], "الترفيه": ["Loisirs", "Leisure", "Ocio"], "متفرقات": ["Divers", "Miscellaneous", "Varios"],
 
+    // ---- Liste de courses
+    "🛒 للشراء": ["🛒 À acheter", "🛒 To buy", "🛒 Por comprar"], "القائمة": ["Liste", "List", "Lista"], "ماذا نفد؟ مثال: بطاطس، لحم، حليب": ["Qu'est-ce qui manque ? ex. pommes de terre, viande, lait", "What ran out? e.g. potatoes, meat, milk", "¿Qué se acabó? ej. patatas, carne, leche"],
+    "الكمية": ["Quantité", "Qty", "Cantidad"], "+ أضف": ["+ Ajouter", "+ Add", "+ Añadir"], "المادة": ["Article", "Item", "Artículo"], "اشتريته": ["Acheté", "Bought", "Comprado"],
+    "الثمن (اختياري)": ["Prix (facultatif)", "Price (optional)", "Precio (opcional)"], "الثمن": ["Prix", "Price", "Precio"], "تم الشراء": ["Acheté", "Bought", "Comprado"],
+    "نفد مرة أخرى:": ["Encore épuisé :", "Ran out again:", "Se acabó otra vez:"], "موجود في القائمة": ["Déjà dans la liste", "Already on the list", "Ya está en la lista"], "أُضيف إلى قائمة الشراء ✓": ["Ajouté à la liste ✓", "Added to the list ✓", "Añadido a la lista ✓"],
+    "لا شيء للشراء الآن. عندما ينفد شيء، أضفه هنا ليذكّرك في لوحة القيادة.": ["Rien à acheter. Quand quelque chose manque, ajoutez-le ici : il apparaîtra sur le tableau de bord.", "Nothing to buy right now. When something runs out, add it here and it will show on the dashboard.", "Nada que comprar. Cuando algo se acabe, añádelo aquí y aparecerá en el panel."],
     // ---- Échéances
     "🔔 الفواتير والالتزامات الدورية": ["🔔 Factures et échéances", "🔔 Bills & recurring payments", "🔔 Facturas y pagos fijos"], "قائمة الالتزامات": ["Liste des échéances", "Bill list", "Lista de pagos"], "مرتبة حسب أقرب استحقاق": ["Triées par échéance", "Sorted by due date", "Ordenadas por vencimiento"],
     "قريبة الاستحقاق": ["Bientôt dues", "Due soon", "Vencen pronto"], "داخل الهامش": ["dans la marge", "within margin", "dentro del margen"], "متأخرة": ["En retard", "Overdue", "Atrasadas"], "لم تُدفع بعد": ["pas encore payées", "not paid yet", "aún sin pagar"],
@@ -209,6 +215,9 @@
     [/^حذف الفئة و(\d+) مصروف؟$/, (m) => ["Supprimer la catégorie et " + m[1] + " dépense(s) ?", "Delete category and " + m[1] + " expense(s)?", "¿Eliminar la categoría y " + m[1] + " gasto(s)?"]],
     [/^([+−]\d+) على الحفاظ$/, (m) => [m[1] + " kcal / maintien", m[1] + " kcal vs maintenance", m[1] + " kcal / mantenimiento"]],
     [/^فئة جديدة في «(.+)»$/, (m) => ["Nouvelle catégorie dans « " + T(m[1], "fr") + " »", "New category in “" + T(m[1], "en") + "”", "Nueva categoría en «" + T(m[1], "es") + "»"]],
+    [/^اشتُري «(.+)» · (.+) درهم ✓$/, (m) => ["« " + m[1] + " » acheté · " + m[2] + " DH ✓", "“" + m[1] + "” bought · " + m[2] + " DH ✓", "«" + m[1] + "» comprado · " + m[2] + " DH ✓"]],
+    [/^اشتُري «(.+)» ✓$/, (m) => ["« " + m[1] + " » acheté ✓", "“" + m[1] + "” bought ✓", "«" + m[1] + "» comprado ✓"]],
+    [/^\+ (.+)$/, (m) => ["+ " + m[1], "+ " + m[1], "+ " + m[1]]],
   ];
 
   const AR = /[\u0600-\u06FF]/;
