@@ -5,7 +5,7 @@ const { SUPPLEMENTS, PRODUCTS } = require("./data.js");
 
 test("GTIN: EAN-13 valide (structure seulement)", () => {
   assert.equal(C.validateGTIN("4006381333931").valid, true);
-  assert.match(C.validateGTIN("4006381333931").reason, /ما كيثبتش/);
+  assert.match(C.validateGTIN("4006381333931").reason, /لا يثبت/);
 });
 test("GTIN: chiffre de contrôle faux", () => {
   assert.equal(C.validateGTIN("4006381333932").valid, false);
@@ -86,9 +86,35 @@ test("Calendrier: alarmes dues une seule fois", () => {
   const ev = [{ id: "a", start: "07:00", end: "07:30", alarm: true }, { id: "b", start: "07:00", end: "08:00", alarm: false }];
   const fired = new Set();
   assert.equal(C.dueAlarms(ev, 420, fired).length, 1);
-  fired.add("a@07:00");
+  fired.add("a@07:00-0");
   assert.equal(C.dueAlarms(ev, 420, fired).length, 0);
   assert.equal(C.dueAlarms(ev, 430, new Set()).length, 0);
+});
+test("Alarme: rappel X minutes avant", () => {
+  const e = { id: "g", start: "18:00", end: "19:00", alarm: true, remind: 15 };
+  assert.equal(C.alarmMin(e), 17 * 60 + 45);
+  assert.equal(C.dueAlarms([e], C.toMin("17:45"), new Set()).length, 1);
+  assert.equal(C.dueAlarms([e], C.toMin("18:00"), new Set()).length, 0);
+});
+test("Répétition: tous les jours, jours ouvrables, chaque semaine", () => {
+  const d = { repeat: "daily", since: "2026-10-09" };
+  assert.equal(C.occursOn(d, "2026-10-08"), false);
+  assert.equal(C.occursOn(d, "2026-10-20"), true);
+  const w = { repeat: "weekdays", since: "2026-10-09" }; // vendredi
+  assert.equal(C.occursOn(w, "2026-10-10"), false); // samedi
+  assert.equal(C.occursOn(w, "2026-10-12"), true); // lundi
+  const k = { repeat: "weekly", since: "2026-10-09" };
+  assert.equal(C.occursOn(k, "2026-10-16"), true);
+  assert.equal(C.occursOn(k, "2026-10-17"), false);
+  assert.equal(C.occursOn({ repeat: "none", since: "2026-10-09" }, "2026-10-09"), false);
+});
+test("Répétition: créneaux de notification hebdomadaires", () => {
+  assert.deepEqual(C.repeatSlots({ repeat: "daily", start: "06:30", remind: 10 }), [{ weekday: null, hour: 6, minute: 20 }]);
+  const wk = C.repeatSlots({ repeat: "weekdays", start: "08:00", remind: 0 });
+  assert.deepEqual(wk.map((s) => s.weekday), [2, 3, 4, 5, 6]); // lun..ven (1 = dimanche)
+  // 00:10 avec rappel 30 min → 23:40 la veille
+  const late = C.repeatSlots({ repeat: "weekly", since: "2026-10-12", start: "00:10", remind: 30 }); // lundi
+  assert.deepEqual(late, [{ weekday: 1, hour: 23, minute: 40 }]); // dimanche
 });
 test("Calendrier: migration de l'ancien format horaire", () => {
   const e = C.slotsToEvents({ "06": { text: "Gym", cat: "sport" }, "07": { text: "" } });
