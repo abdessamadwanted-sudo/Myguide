@@ -183,6 +183,7 @@ details.grp > summary .bar i { display: block; height: 100%; }
 .band-v { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .band-t { height: 12px; background: var(--panel-2); border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
 .band-t i { display: block; height: 100%; border-radius: 6px; }
+.sec-title { font-size: 1.05rem; margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
 /* Bills */
 .due-list { display: grid; gap: 0; }
 .due-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); align-items: center; }
@@ -252,8 +253,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   <button class="nav" data-tab="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>معطياتي</button>
   <div class="sec">التنظيم</div>
   <button class="nav" data-tab="cal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>الأجندة<span class="badge" id="nb-cal"></span></button>
-  <button class="nav" data-tab="exp"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>المصاريف</button>
-  <button class="nav" data-tab="bills"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>الالتزامات<span class="badge" id="nb-bills"></span></button>
+  <button class="nav" data-tab="exp"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>المصاريف<span class="badge" id="nb-exp"></span></button>
   <div class="sec">مراجع</div>
   <button class="nav" data-tab="src"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6M9 14h6"/></svg>المصادر</button>
   <div class="foot">محتوى تعليمي، ولا يغني عن استشارة الطبيب أو الصيدلي.</div>
@@ -269,7 +269,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
 
   <!-- لوحة القيادة -->
   <section class="page view" id="v-home">
-    <div class="panel" id="home-bills" hidden><header><h2>الفواتير والالتزامات القادمة</h2><button class="btn" data-go="bills">كل الالتزامات</button></header>
+    <div class="panel" id="home-bills" hidden><header><h2>🔔 فواتير يجب أداؤها</h2><button class="btn" data-go="bills">كل الفواتير</button></header>
       <div class="due-list" id="home-bills-list"></div></div>
     <div class="kpis">
       <div class="kpi"><span class="lbl">مواعيد اليوم</span><span class="v" id="k-count">0</span><span class="d" id="k-next">لا توجد مواعيد</span></div>
@@ -399,12 +399,8 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     </div>
     <div class="panel"><header><h2>المصاريف حسب الفئة</h2><span class="lbl" id="x-sum-lbl"></span></header>
       <div class="body flush" id="x-groups"></div></div>
-    <p class="note">تُحفظ المصاريف في الهاتف فقط. يمكنك إضافة فئات خاصة بك داخل كل مجموعة، أو حذف أي فئة بزر 🗑.</p>
-  </section>
-
-  <!-- الالتزامات -->
-  <section class="page view" id="v-bills" hidden>
-    <div class="kpis">
+    <h2 class="sec-title" id="bills-sec">🔔 الفواتير والالتزامات الدورية</h2>
+    <div class="kpis" id="bills-kpis">
       <div class="kpi"><span class="lbl">الالتزامات</span><span class="v" id="b-count">0</span><span class="d" id="b-monthly"></span></div>
       <div class="kpi"><span class="lbl">قريبة الاستحقاق</span><span class="v" id="b-soon">0</span><span class="d">داخل الهامش</span></div>
       <div class="kpi"><span class="lbl">متأخرة</span><span class="v" id="b-late">0</span><span class="d">لم تُدفع بعد</span></div>
@@ -437,8 +433,10 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
         </form>
       </div>
     </div>
-    <p class="note" id="b-note">تبقى كل الفواتير غير المؤداة ظاهرة في لوحة القيادة حتى تضغط «تم الأداء»، فيُسجَّل المبلغ في المصاريف تلقائيًا.</p>
+    <p class="note" id="b-note">عندما يحين موعد فاتورة أو تدخل في هامش التنبيه أو تتأخر، تظهر في لوحة القيادة وتبقى حتى تضغط «تم الأداء»، فيُسجَّل المبلغ في المصاريف تلقائيًا. يمكنك أيضًا الضغط على 🔔 في أي فئة لإضافة تنبيه لها.</p>
+    <p class="note">تُحفظ المصاريف في الهاتف فقط. يمكنك إضافة فئات خاصة بك داخل كل مجموعة، أو حذف أي فئة بزر 🗑.</p>
   </section>
+
 
   <!-- المعادن -->
   <section class="page view" id="v-min" hidden>
@@ -511,13 +509,14 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   const ul = (a) => a && a.length ? `<ul>${a.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<span class="muted">لا شيء مسجل</span>`;
 
   // ---------- Navigation
-  const TITLES = { home: ["Dashboard", "لوحة القيادة"], me: ["Profil", "معطياتي"], cal: ["Agenda", "الأجندة"], exp: ["Dépenses", "المصاريف"], bills: ["Échéances", "الالتزامات"], min: ["Minéraux", "المعادن"], sup: ["Suppléments", "المكملات"], cmp: ["Comparaison", "مقارنة المنتجات"], src: ["Sources", "المصادر"] };
+  const TITLES = { home: ["Dashboard", "لوحة القيادة"], me: ["Profil", "معطياتي"], cal: ["Agenda", "الأجندة"], exp: ["Dépenses", "المصاريف"],  min: ["Minéraux", "المعادن"], sup: ["Suppléments", "المكملات"], cmp: ["Comparaison", "مقارنة المنتجات"], src: ["Sources", "المصادر"] };
   function setDrawer(o) { $("#side").classList.toggle("open", o); $("#scrim").hidden = !o; $("#menu").setAttribute("aria-expanded", o); }
   $("#menu").addEventListener("click", () => setDrawer(true));
   $("#scrim").addEventListener("click", () => setDrawer(false));
   const navStack = [];
   let curTab = "home";
   function go(tab, fromBack) {
+    if (tab === "bills") { go("exp", fromBack); setTimeout(() => { const s = document.getElementById("bills-sec"); if (s) s.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); return; }
     if (!TITLES[tab]) tab = "home";
     if (!fromBack && tab !== curTab) { navStack.push(curTab); if (navStack.length > 30) navStack.shift(); }
     curTab = tab;
@@ -1132,7 +1131,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
         const st = s.bySub[sb.id];
         const list = expenses.filter((e) => e.sub === sb.id && C.monthOf(e.date) === xMonth).sort((a, b) => (a.date < b.date ? 1 : -1));
         return `<div class="sub"><div class="sub-h"><span>${esc(sb.ar)}${sb.custom ? ` <span class="pill n">خاصة</span>` : ""} <button class="x-del" data-delsub="${sb.id}" title="حذف الفئة" aria-label="حذف الفئة ${esc(sb.ar)}">🗑</button></span><span><span class="amt">${st ? fmtDH(st.sum) : "0"}</span> <span class="dh">درهم${st ? " · " + st.count + "×" : ""}</span>
-          <button class="btn" data-quick="${sb.id}" style="padding:2px 8px;margin-inline-start:6px">+</button></span></div>
+          <button class="btn" data-bell="${sb.id}" style="padding:2px 8px;margin-inline-start:6px" title="تنبيه بالاستحقاق" aria-label="تنبيه بالاستحقاق">🔔${bills.some((x) => x.sub === sb.id) ? "✓" : ""}</button><button class="btn" data-quick="${sb.id}" style="padding:2px 8px;margin-inline-start:4px" aria-label="إضافة مصروف">+</button></span></div>
           ${list.length ? `<div class="sub-list">${list.map((e) => `<div><span class="dt">${e.date.slice(8)}/${e.date.slice(5, 7)}</span><span>${e.note ? esc(e.note) : (e.item && e.item !== sb.ar ? esc(e.item) : `<span class="lbl">—</span>`)}</span><span class="a">${fmtDH(e.amount)}</span><button class="x-del" data-del="${e.id}" aria-label="حذف">×</button></div>`).join("")}</div>` : ""}
         </div>`;
       }).join("");
@@ -1151,6 +1150,12 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       else { hiddenSubs.push(id); store.set("exp-hidden", JSON.stringify(hiddenSubs)); }
       expenses = expenses.filter((e) => e.sub !== id); saveExp();
       const keep = $("#x-sub").value; fillSubSelect($("#x-sub"), keep === id ? "" : keep); fillSubSelect($("#b-sub"), $("#b-sub").value); renderAgain(); renderExp(); renderHomeExp();
+    }));
+    $$("#x-groups [data-bell]").forEach((b) => b.addEventListener("click", () => {
+      const sid = b.dataset.bell, ex = bills.find((x) => x.sub === sid);
+      if (ex) openBill(ex.id);
+      else { openBill(null); $("#b-name").value = subName(sid); fillSubSelect($("#b-sub"), sid); const last = [...expenses].filter((e) => e.sub === sid).sort((a, c) => (a.date < c.date ? 1 : -1))[0]; if (last) $("#b-amount").value = String(last.amount).replace(".", ","); }
+      $("#b-panel").scrollIntoView({ behavior: "smooth", block: "start" }); $("#b-amount").focus({ preventScroll: true });
     }));
     $$("#x-groups [data-quick]").forEach((b) => b.addEventListener("click", () => {
       $("#x-sub").value = b.dataset.quick; store.set("exp-last-sub", b.dataset.quick); renderAgain();
@@ -1180,7 +1185,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
 
   // ---------- Bills / recurring payments
   let bills = jget("bills", []);
-  const saveBills = () => { store.set("bills", JSON.stringify(bills)); syncBillsNative(); };
+  const saveBills = () => { store.set("bills", JSON.stringify(bills)); syncBillsNative(); setTimeout(renderExp, 0); };
   let bEditing = null;
   const FREQ_AR = { monthly: "شهري", yearly: "سنوي", once: "مرة واحدة" };
   function dueText(d) {
@@ -1208,7 +1213,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     $("#b-soon").textContent = up.filter((x) => x.d.status === "soon").length;
     $("#b-late").innerHTML = (() => { const n = up.filter((x) => x.d.status === "overdue").length; return n ? `<span style="color:var(--bad)">${n}</span>` : "0"; })();
     $("#b-30").textContent = fmtDH(rows.filter((r) => r.d.status !== "paid" && r.d.days <= 30).reduce((a, r) => a + r.b.amount, 0));
-    $("#nb-bills").textContent = up.length || "";
+    const nb = document.getElementById("nb-exp"); if (nb) nb.textContent = up.length ? "🔔" + up.length : "";
     $("#b-table").innerHTML = rows.length ? rows.map(({ b, d }) => `<tr class="click ${bEditing === b.id ? "sel" : ""}" data-id="${b.id}">
       <td><b>${esc(b.name)}</b><div class="lbl">${FREQ_AR[b.freq]} · تنبيه قبل ${b.margin} يوم · ${esc(subName(b.sub))}</div></td>
       <td class="n">${fmtDH(b.amount)}</td><td class="n">${fmtDate(d.due)}</td><td>${dueText(d)}</td>
@@ -1217,7 +1222,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     $$("#b-table tr.click").forEach((tr) => tr.addEventListener("click", () => openBill(tr.dataset.id)));
     $$("#b-table [data-pay]").forEach((btn) => btn.addEventListener("click", (e) => { e.stopPropagation(); payBill(btn.dataset.pay); }));
     // dashboard
-    const open = rows.filter((r) => r.d.status !== "paid");
+    const open = rows.filter((r) => r.d.status === "overdue" || r.d.status === "soon");
     $("#home-bills").hidden = !open.length;
     const dm = (k) => `${k.slice(8)}/${k.slice(5, 7)}`;
     $("#home-bills-list").innerHTML = open.map(({ b, d }) => `<div class="due-row ${d.status === "overdue" ? "late" : d.status === "soon" ? "soon" : ""}">
