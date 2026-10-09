@@ -250,6 +250,49 @@
     return [...seen.values()].slice(0, limit);
   }
 
+  // Rapport détaillé sur une période [from, to] (dates incluses), comparé à la période précédente de même durée
+  function periodReport(entries, from, to, tree) {
+    const inR = (k, a, b) => k >= a && k <= b;
+    const len = dayDiff(from, to) + 1;
+    const pTo = addDaysKey(from, -1), pFrom = addDaysKey(from, -len);
+    const r2 = (n) => Math.round(n * 100) / 100;
+    const list = (entries || []).filter((e) => inR(e.date, from, to)), plist = (entries || []).filter((e) => inR(e.date, pFrom, pTo));
+    const sumBy = (arr) => { const bySub = {}; let total = 0; arr.forEach((e) => { const a = Number(e.amount) || 0; total += a; const s = (bySub[e.sub] = bySub[e.sub] || { sum: 0, count: 0 }); s.sum += a; s.count++; }); return { total: r2(total), bySub }; };
+    const cur = sumBy(list), prev = sumBy(plist);
+    const groups = (tree || []).map((g) => {
+      const subs = g.subs.map((s) => ({ id: s.id, sum: r2((cur.bySub[s.id] || {}).sum || 0), count: (cur.bySub[s.id] || {}).count || 0, prev: r2((prev.bySub[s.id] || {}).sum || 0),
+        items: list.filter((e) => e.sub === s.id).sort((a, b) => (a.date < b.date ? -1 : 1)) })).filter((s) => s.sum > 0 || s.prev > 0).sort((a, b) => b.sum - a.sum);
+      const sum = r2(subs.reduce((x, s) => x + s.sum, 0)), prv = r2(subs.reduce((x, s) => x + s.prev, 0));
+      return { id: g.id, sum, prev: prv, diff: r2(sum - prv), pct: cur.total ? Math.round((sum / cur.total) * 1000) / 10 : 0, subs };
+    }).filter((g) => g.sum > 0 || g.prev > 0).sort((a, b) => b.sum - a.sum);
+    const byDay = {}; list.forEach((e) => { byDay[e.date] = (byDay[e.date] || 0) + (Number(e.amount) || 0); });
+    const maxDay = Object.entries(byDay).sort((a, b) => b[1] - a[1])[0] || null;
+    const biggest = [...list].sort((a, b) => b.amount - a.amount)[0] || null;
+    return { from, to, prevFrom: pFrom, prevTo: pTo, total: cur.total, count: list.length, prevTotal: prev.total, diff: r2(cur.total - prev.total),
+      diffPct: prev.total ? Math.round(((cur.total - prev.total) / prev.total) * 1000) / 10 : null,
+      avgPerDay: r2(cur.total / len), days: len, maxDay: maxDay ? { date: maxDay[0], sum: r2(maxDay[1]) } : null, biggest, groups };
+  }
+  const addDaysKey = (key, n) => { const [y, m, d] = key.split("-").map(Number); const x = new Date(y, m - 1, d + n); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
+  // Rapport mensuel = période du 1er au dernier jour, comparée au mois précédent
+  function monthReport(entries, month, tree) {
+    const [y, m] = month.split("-").map(Number), last = new Date(y, m, 0).getDate();
+    const r = periodReport(entries, month + "-01", `${month}-${String(last).padStart(2, "0")}`, tree);
+    const pm = addMonths(month, -1), [py, pmm] = pm.split("-").map(Number), plast = new Date(py, pmm, 0).getDate();
+    const prev = periodReport(entries, pm + "-01", `${pm}-${String(plast).padStart(2, "0")}`, tree);
+    const r2 = (n) => Math.round(n * 100) / 100;
+    r.prevTotal = prev.total; r.diff = r2(r.total - prev.total); r.diffPct = prev.total ? Math.round(((r.total - prev.total) / prev.total) * 1000) / 10 : null;
+    const pSub = {}; prev.groups.forEach((g) => g.subs.forEach((s) => { pSub[s.id] = s.sum; }));
+    const pGrp = Object.fromEntries(prev.groups.map((g) => [g.id, g.sum]));
+    const curG = Object.fromEntries(r.groups.map((g) => [g.id, g]));
+    r.groups = (tree || []).map((g) => {
+      const cg = curG[g.id] || { id: g.id, sum: 0, subs: [] }, prv = pGrp[g.id] || 0;
+      const subs = g.subs.map((s) => { const cs = cg.subs.find((x) => x.id === s.id) || { id: s.id, sum: 0, count: 0, items: [] }; return { ...cs, prev: pSub[s.id] || 0 }; }).filter((s) => s.sum > 0 || s.prev > 0).sort((a, b) => b.sum - a.sum);
+      return { id: g.id, sum: cg.sum, prev: prv, diff: r2(cg.sum - prv), pct: r.total ? Math.round((cg.sum / r.total) * 1000) / 10 : 0, subs };
+    }).filter((g) => g.sum > 0 || g.prev > 0).sort((a, b) => b.sum - a.sum);
+    r.month = month;
+    return r;
+  }
+
   // ---- Échéances (paiements récurrents) : monthly (jour du mois) | yearly | once (date)
   const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
   const keyOf = (y, m, d) => `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
@@ -388,7 +431,7 @@
     return "next";
   }
 
-  const api = { resizeMeals, validateMed, medActiveOn, routineFor, parseAmount, monthOf, addMonths, validateExpense, expenseSummary, recentItems, dayDiff, validateBill, billDue, upcomingBills, REMIND, EVERY, REPEAT, alarmMin, alarmTimes, ageFrom, occursOn, repeatSlots, ACTIVITY, validateProfile, bmiCategory, bodyStats, TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
+  const api = { periodReport, addDaysKey, monthReport, resizeMeals, validateMed, medActiveOn, routineFor, parseAmount, monthOf, addMonths, validateExpense, expenseSummary, recentItems, dayDiff, validateBill, billDue, upcomingBills, REMIND, EVERY, REPEAT, alarmMin, alarmTimes, ageFrom, occursOn, repeatSlots, ACTIVITY, validateProfile, bmiCategory, bodyStats, TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.SuppCore = api;
 })(typeof window !== "undefined" ? window : globalThis);

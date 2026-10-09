@@ -162,6 +162,16 @@
     "الثمن (اختياري)": ["Prix (facultatif)", "Price (optional)", "Precio (opcional)"], "الثمن": ["Prix", "Price", "Precio"], "تم الشراء": ["Acheté", "Bought", "Comprado"],
     "نفد مرة أخرى:": ["Encore épuisé :", "Ran out again:", "Se acabó otra vez:"], "موجود في القائمة": ["Déjà dans la liste", "Already on the list", "Ya está en la lista"], "أُضيف إلى قائمة الشراء ✓": ["Ajouté à la liste ✓", "Added to the list ✓", "Añadido a la lista ✓"],
     "لا شيء للشراء الآن. عندما ينفد شيء، أضفه هنا ليذكّرك في لوحة القيادة.": ["Rien à acheter. Quand quelque chose manque, ajoutez-le ici : il apparaîtra sur le tableau de bord.", "Nothing to buy right now. When something runs out, add it here and it will show on the dashboard.", "Nada que comprar. Cuando algo se acabe, añádelo aquí y aparecerá en el panel."],
+    // ---- Rapport mensuel
+    "التقرير الشهري": ["Rapport mensuel", "Monthly report", "Informe mensual"], "التقرير": ["Rapport", "Report", "Informe"], "الفترة": ["Période", "Period", "Periodo"],
+    "الأسبوع": ["Semaine", "Week", "Semana"], "الشهر": ["Mois", "Month", "Mes"], "السنة": ["Année", "Year", "Año"], "فترة مخصصة": ["Période libre", "Custom range", "Periodo libre"], "إلى": ["Au", "To", "Hasta"],
+    "مقارنة بالفترة السابقة": ["vs période précédente", "vs previous period", "vs periodo anterior"], "الفترة السابقة": ["Période précédente", "Previous period", "Periodo anterior"], "الفترة التالية": ["Période suivante", "Next period", "Periodo siguiente"],
+    "اختر أي فترة: أسبوع أو شهر أو سنة أو من تاريخ إلى تاريخ. يُقارَن التقرير بالفترة السابقة من نفس المدة، ويمكنك نسخه ولصقه في رسالة أو ملاحظة.": ["Choisissez une période : semaine, mois, année ou dates libres. Le rapport est comparé à la période précédente de même durée ; vous pouvez le copier dans un message.", "Pick any period: week, month, year or a custom range. The report is compared with the previous period of the same length, and you can copy it into a message.", "Elige un periodo: semana, mes, año o fechas libres. Se compara con el periodo anterior de igual duración y puedes copiarlo en un mensaje."], "📋 نسخ التقرير": ["📋 Copier le rapport", "📋 Copy report", "📋 Copiar informe"], "مجموع المصاريف": ["Total des dépenses", "Total spending", "Gasto total"],
+    "أكثر يوم إنفاقًا": ["Jour le plus dépensier", "Highest-spending day", "Día de más gasto"], "التوزيع حسب الفئة": ["Répartition par catégorie", "Breakdown by category", "Reparto por categoría"],
+    "التصنيف": ["Sous-catégorie", "Subcategory", "Subcategoría"], "عدد": ["Nb", "Count", "Nº"], "الفرق": ["Écart", "Change", "Diferencia"], "(جارٍ)": ["(en cours)", "(in progress)", "(en curso)"],
+    "لا توجد مصاريف مسجلة في هذا الشهر.": ["Aucune dépense enregistrée ce mois-ci.", "No spending recorded this month.", "No hay gastos registrados este mes."], "نُسخ التقرير ✓": ["Rapport copié ✓", "Report copied ✓", "Informe copiado ✓"],
+    "اضغط لعرض التقرير المفصل لكل فئة وتصنيف": ["Touchez pour voir le rapport détaillé par catégorie", "Tap to see the detailed report by category", "Pulsa para ver el informe detallado por categoría"],
+    "يُحسب التقرير من المصاريف المسجلة في الهاتف. يمكنك نسخه ولصقه في رسالة أو ملاحظة.": ["Le rapport est calculé à partir des dépenses enregistrées. Vous pouvez le copier dans un message ou une note.", "The report is built from the expenses on your phone. You can copy it into a message or note.", "El informe se calcula con los gastos guardados. Puedes copiarlo en un mensaje o una nota."],
     // ---- Échéances
     "🔔 الفواتير والالتزامات الدورية": ["🔔 Factures et échéances", "🔔 Bills & recurring payments", "🔔 Facturas y pagos fijos"], "قائمة الالتزامات": ["Liste des échéances", "Bill list", "Lista de pagos"], "مرتبة حسب أقرب استحقاق": ["Triées par échéance", "Sorted by due date", "Ordenadas por vencimiento"],
     "قريبة الاستحقاق": ["Bientôt dues", "Due soon", "Vencen pronto"], "داخل الهامش": ["dans la marge", "within margin", "dentro del margen"], "متأخرة": ["En retard", "Overdue", "Atrasadas"], "لم تُدفع بعد": ["pas encore payées", "not paid yet", "aún sin pagar"],
@@ -218,6 +228,12 @@
     [/^اشتُري «(.+)» · (.+) درهم ✓$/, (m) => ["« " + m[1] + " » acheté · " + m[2] + " DH ✓", "“" + m[1] + "” bought · " + m[2] + " DH ✓", "«" + m[1] + "» comprado · " + m[2] + " DH ✓"]],
     [/^اشتُري «(.+)» ✓$/, (m) => ["« " + m[1] + " » acheté ✓", "“" + m[1] + "” bought ✓", "«" + m[1] + "» comprado ✓"]],
     [/^\+ (.+)$/, (m) => ["+ " + m[1], "+ " + m[1], "+ " + m[1]]],
+    [/^تقرير مصاريف (.+) جاهز$/, (m) => ["Rapport des dépenses de " + T(m[1], "fr") + " prêt", T(m[1], "en") + " spending report is ready", "Informe de gastos de " + T(m[1], "es") + " listo"]],
+    [/^أكبر مصروف: (.+)$/, (m) => ["Plus grosse dépense : " + T(m[1], "fr"), "Biggest expense: " + T(m[1], "en"), "Mayor gasto: " + T(m[1], "es")]],
+    [/^على (\d+) يومًا$/, (m) => ["sur " + m[1] + " jours", "over " + m[1] + " days", "en " + m[1] + " días"]],
+    [/^([\d.,]+)% من المجموع$/, (m) => [m[1] + " % du total", m[1] + "% of total", m[1] + " % del total"]],
+    [/^الفترة السابقة (.+)$/, (m) => ["Période préc. " + T(m[1], "fr"), "Previous " + T(m[1], "en"), "Periodo ant. " + T(m[1], "es")]],
+    [/^الشهر السابق (.+)$/, (m) => ["Mois préc. " + T(m[1], "fr"), "Last month " + T(m[1], "en"), "Mes ant. " + T(m[1], "es")]],
   ];
 
   const AR = /[\u0600-\u06FF]/;

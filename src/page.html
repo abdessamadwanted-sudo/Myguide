@@ -197,6 +197,24 @@ html[dir="ltr"] .side { right: auto; left: 0; border-left: 0; border-right: 1px 
 .shop-pay { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 6px; }
 .shop-pay input, .shop-pay select { min-width: 0; width: 100%; }
 .shop-item.done { opacity: 0; transform: translateX(-12px); transition: opacity .35s, transform .35s; }
+/* Monthly report */
+.rp-groups { display: grid; gap: 12px; }
+.rp-modes { display: flex; width: 100%; } .rp-modes button { flex: 1; padding: 8px 4px; font-size: .85rem; }
+.rp-g { --gc: var(--accent); border: 1px solid color-mix(in srgb, var(--gc) 45%, transparent); background: var(--panel); border-radius: 12px; overflow: hidden; }
+.rp-g > header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; padding: 12px 14px; background: color-mix(in srgb, var(--gc) 12%, var(--panel)); border-bottom: 1px solid color-mix(in srgb, var(--gc) 35%, transparent); }
+.rp-g > header .ic { font-size: 1.3rem; }
+.rp-g > header h3 { margin: 0; font-size: 1rem; }
+.rp-g > header .tot { font-family: var(--mono); font-weight: 600; color: var(--gc); text-align: end; }
+.rp-g > header .meta { grid-column: 2 / -1; font-size: .76rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+.rp-g table td.n, .rp-g table th { white-space: nowrap; }
+.rp-g details summary { cursor: pointer; list-style: none; }
+.rp-g details summary::-webkit-details-marker { display: none; }
+.rp-items { display: grid; gap: 2px; font-size: .8rem; padding-top: 6px; }
+.rp-items div { display: flex; justify-content: space-between; gap: 8px; border-top: 1px dashed var(--line); padding-top: 3px; }
+.up { color: var(--bad); } .down { color: var(--accent); }
+.report-ready { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: linear-gradient(90deg, color-mix(in srgb, var(--sky) 14%, var(--panel)), var(--panel)); border: 1px solid color-mix(in srgb, var(--sky) 45%, transparent); border-radius: 10px; cursor: pointer; }
+.report-ready .big { font-size: 1.6rem; }
+.report-ready b { display: block; }
 /* Expenses */
 .m-label { min-width: 120px; text-align: center; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -351,6 +369,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   <div class="sec">التنظيم</div>
   <button class="nav" data-tab="cal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>الأجندة<span class="badge" id="nb-cal"></span></button>
   <button class="nav" data-tab="exp"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>المصاريف<span class="badge" id="nb-exp"></span></button>
+  <button class="nav" data-tab="report"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>التقرير</button>
   <div class="sec">مراجع</div>
   <button class="nav" data-tab="src"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6M9 14h6"/></svg>المصادر</button>
   <div class="sec">المظهر</div>
@@ -370,6 +389,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
 
   <!-- لوحة القيادة -->
   <section class="page view" id="v-home">
+    <div class="report-ready" id="home-report" hidden role="button" tabindex="0"><span class="big">📊</span><span><b id="home-report-t"></b><span class="lbl">اضغط لعرض التقرير المفصل لكل فئة وتصنيف</span></span></div>
     <div class="panel" id="home-bills" hidden><header><h2>🔔 فواتير يجب أداؤها</h2><button class="btn" data-go="bills">كل الفواتير</button></header>
       <div class="due-list" id="home-bills-list"></div></div>
     <div class="panel" id="home-shop" hidden><header><h2>🛒 للشراء</h2><button class="btn" data-go="shop">القائمة</button></header>
@@ -390,6 +410,33 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     </div>
     <div class="panel"><header><h2>مصاريف هذا الشهر حسب الفئة</h2><button class="btn" data-go="exp">التفاصيل</button></header>
       <div class="body" id="home-exp"></div></div>
+  </section>
+
+  <!-- التقرير الشهري -->
+  <section class="page view" id="v-report" hidden>
+    <div class="seg rp-modes" role="group" aria-label="الفترة">
+      <button aria-pressed="false" data-rpm="week">الأسبوع</button><button aria-pressed="true" data-rpm="month">الشهر</button><button aria-pressed="false" data-rpm="year">السنة</button><button aria-pressed="false" data-rpm="custom">فترة مخصصة</button>
+    </div>
+    <div class="filters" id="rp-custom" hidden>
+      <label class="inline-sel">من <input type="date" id="rp-from"></label>
+      <label class="inline-sel">إلى <input type="date" id="rp-to"></label>
+    </div>
+    <div class="filters">
+      <button class="icon-btn" id="rp-prev" aria-label="الفترة السابقة">›</button>
+      <strong id="rp-label" class="m-label"></strong>
+      <button class="icon-btn" id="rp-next" aria-label="الفترة التالية">‹</button>
+      <span style="margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="rp-copy">📋 نسخ التقرير</button></span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span class="lbl">مجموع المصاريف</span><span class="v" id="rp-total">0</span><span class="d" id="rp-count"></span></div>
+      <div class="kpi"><span class="lbl">مقارنة بالفترة السابقة</span><span class="v" id="rp-diff">—</span><span class="d" id="rp-prev-t"></span></div>
+      <div class="kpi"><span class="lbl">المعدل اليومي</span><span class="v" id="rp-avg">0</span><span class="d" id="rp-days"></span></div>
+      <div class="kpi"><span class="lbl">أكثر يوم إنفاقًا</span><span class="v" id="rp-maxday" style="font-size:1.1rem">—</span><span class="d" id="rp-maxday-d"></span></div>
+    </div>
+    <div class="panel"><header><h2>التوزيع حسب الفئة</h2><span class="lbl" id="rp-sub"></span></header>
+      <div class="body" id="rp-bands"></div></div>
+    <div id="rp-groups" class="rp-groups"></div>
+    <p class="note" id="rp-note">اختر أي فترة: أسبوع أو شهر أو سنة أو من تاريخ إلى تاريخ. يُقارَن التقرير بالفترة السابقة من نفس المدة، ويمكنك نسخه ولصقه في رسالة أو ملاحظة.</p>
   </section>
 
   <!-- معطياتي -->
@@ -681,7 +728,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   const ul = (a) => a && a.length ? `<ul>${a.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<span class="muted">لا شيء مسجل</span>`;
 
   // ---------- Navigation
-  const TITLES = { home: ["Dashboard", "لوحة القيادة"], me: ["Profil", "معطياتي"], cal: ["Agenda", "الأجندة"], exp: ["Dépenses", "المصاريف"],  min: ["Minéraux", "المعادن"], sup: ["Suppléments", "المكملات"], cmp: ["Comparaison", "مقارنة المنتجات"], src: ["Sources", "المصادر"] };
+  const TITLES = { home: ["Dashboard", "لوحة القيادة"], me: ["Profil", "معطياتي"], report: ["Rapport", "التقرير"], cal: ["Agenda", "الأجندة"], exp: ["Dépenses", "المصاريف"],  min: ["Minéraux", "المعادن"], sup: ["Suppléments", "المكملات"], cmp: ["Comparaison", "مقارنة المنتجات"], src: ["Sources", "المصادر"] };
   function setDrawer(o) { $("#side").classList.toggle("open", o); $("#scrim").hidden = !o; $("#menu").setAttribute("aria-expanded", o); }
   $("#menu").addEventListener("click", () => setDrawer(true));
   $("#scrim").addEventListener("click", () => setDrawer(false));
@@ -698,6 +745,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     $("#crumb").textContent = "Supplement Intelligence / " + TITLES[tab][0];
     $("#ptitle").textContent = TITLES[tab][1];
     store.set("supp-tab", tab); setDrawer(false); window.scrollTo({ top: 0 });
+    if (tab === "report" && typeof renderReport === "function") renderReport();
   }
   $$(".nav").forEach((b) => b.addEventListener("click", () => go(b.dataset.tab)));
 
@@ -838,7 +886,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
         }
         if (a.actionId === "snooze") {
           try { await lnSchedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, title: n.title || "⏰ تذكير", body: `تذكير مؤجَّل ${SNOOZE_MIN} دقائق`, channelId: x.ch || "alarms", actionTypeId: "ALARM", schedule: { at: new Date(Date.now() + SNOOZE_MIN * 60000), allowWhileIdle: true }, extra: { ch: x.ch || "alarms", snooze: true } }] }); $("#savestate").textContent = `سيُذكّرك بعد ${SNOOZE_MIN} دقائق`; } catch (e) {}
-        } else if (a.actionId === "tap") { go("cal"); }
+        } else if (a.actionId === "tap") { if (x.report) { rpMonth = x.report; go("report"); } else if (x.bill) go("bills"); else go("cal"); }
       });
     } catch (e) {}
   }
@@ -1617,6 +1665,103 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   }
   $("#shop-form").addEventListener("submit", (e) => { e.preventDefault(); addShop($("#shop-name").value, $("#shop-qty").value); $("#shop-name").value = ""; $("#shop-qty").value = ""; $("#shop-name").focus(); });
 
+  // ---------- Monthly report
+  let rpMonth = (() => { const d = new Date(); return d.getDate() <= 7 ? C.addMonths(thisMonth(), -1) : thisMonth(); })();
+  let rpMode = "month", rpAnchor = today(), rpFrom = C.addDays(today(), -29), rpTo = today();
+  function rpRange() {
+    if (rpMode === "month") { const [y, m] = rpMonth.split("-").map(Number); return [rpMonth + "-01", `${rpMonth}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}`]; }
+    if (rpMode === "week") { const d = parseKey(rpAnchor), off = (d.getDay() + 6) % 7, f = C.addDays(rpAnchor, -off); return [f, C.addDays(f, 6)]; }
+    if (rpMode === "year") { const y = rpAnchor.slice(0, 4); return [y + "-01-01", y + "-12-31"]; }
+    return rpFrom <= rpTo ? [rpFrom, rpTo] : [rpTo, rpFrom];
+  }
+  const dm = (k) => `${k.slice(8)}/${k.slice(5, 7)}`;
+  function rpLabel(f, t) {
+    if (rpMode === "month") return monthName(rpMonth);
+    if (rpMode === "year") return f.slice(0, 4);
+    return `${dm(f)}/${f.slice(0, 4)} → ${dm(t)}/${t.slice(0, 4)}`;
+  }
+  $$(".rp-modes [data-rpm]").forEach((b) => b.addEventListener("click", () => {
+    rpMode = b.dataset.rpm; $$(".rp-modes [data-rpm]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    $("#rp-custom").hidden = rpMode !== "custom"; $("#rp-from").value = rpFrom; $("#rp-to").value = rpTo; renderReport();
+  }));
+  $("#rp-from").addEventListener("change", () => { if ($("#rp-from").value) { rpFrom = $("#rp-from").value; renderReport(); } });
+  $("#rp-to").addEventListener("change", () => { if ($("#rp-to").value) { rpTo = $("#rp-to").value; renderReport(); } });
+  const signDH = (n) => "\u2066" + (n > 0 ? "+" : n < 0 ? "−" : "") + fmtDH(Math.abs(n)) + "\u2069";
+  const dayLabel = (k) => { const d = parseKey(k); return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+  function renderReport() {
+    const tree = expTree(), [f, t] = rpRange();
+    const r = rpMode === "month" ? C.monthReport(expenses, rpMonth, tree) : C.periodReport(expenses, f, t, tree);
+    const gInfo = Object.fromEntries(tree.map((g) => [g.id, g]));
+    const running = t >= today() && f <= today();
+    $("#rp-label").textContent = rpLabel(f, t) + (running ? " (جارٍ)" : "");
+    $("#rp-prev").hidden = $("#rp-next").hidden = rpMode === "custom";
+    $("#rp-total").innerHTML = `${fmtDH(r.total)}<small> درهم</small>`;
+    $("#rp-count").textContent = `${r.count} عملية`;
+    $("#rp-diff").innerHTML = r.prevTotal ? `<span class="${r.diff > 0 ? "up" : "down"}">${signDH(r.diff)}</span><small> درهم</small>` : "—";
+    $("#rp-prev-t").textContent = r.prevTotal ? `${r.diffPct > 0 ? "+" : ""}${r.diffPct}% · الفترة السابقة ${fmtDH(r.prevTotal)} درهم` : "لا توجد بيانات";
+    $("#rp-avg").innerHTML = `${fmtDH(r.avgPerDay)}<small> درهم</small>`;
+    $("#rp-days").textContent = `على ${r.days} يومًا`;
+    $("#rp-maxday").textContent = r.maxDay ? dayLabel(r.maxDay.date) : "—";
+    $("#rp-maxday-d").textContent = r.maxDay ? `${fmtDH(r.maxDay.sum)} درهم` : "";
+    $("#rp-sub").textContent = r.biggest ? `أكبر مصروف: ${subName(r.biggest.sub)} · ${fmtDH(r.biggest.amount)} درهم` : "";
+    const mx = r.groups.length ? Math.max(...r.groups.map((g) => g.sum)) || 1 : 1;
+    $("#rp-bands").innerHTML = r.groups.length ? `<div class="bands">${r.groups.filter((g) => g.sum > 0).map((g) => `<div class="band">
+        <div class="band-h"><span class="band-n"><i style="background:${gInfo[g.id].col}"></i>${gInfo[g.id].ic || ""} ${esc(gInfo[g.id].ar)}</span><span class="band-v">${fmtDH(g.sum)} <span class="dh">درهم · ${g.pct}%</span></span></div>
+        <div class="band-t"><i style="width:${Math.max(2, (g.sum / mx) * 100)}%;background:${gInfo[g.id].col}"></i></div></div>`).join("")}</div>`
+      : `<p class="muted">لا توجد مصاريف مسجلة في هذا الشهر.</p>`;
+    $("#rp-groups").innerHTML = r.groups.map((g) => {
+      const gi = gInfo[g.id];
+      return `<section class="rp-g" style="--gc:${gi.col}"><header><span class="ic">${gi.ic || ""}</span><h3>${esc(gi.ar)}</h3><span class="tot">${fmtDH(g.sum)} <span class="dh">درهم</span></span>
+        <span class="meta"><span>${g.pct}% من المجموع</span><span>الفترة السابقة ${fmtDH(g.prev)} درهم</span>${g.prev ? `<span class="${g.diff > 0 ? "up" : "down"}">${signDH(g.diff)} درهم</span>` : ""}</span></header>
+        <div class="tw"><table><thead><tr><th>التصنيف</th><th>عدد</th><th>المبلغ</th><th>الفترة السابقة</th><th>الفرق</th></tr></thead><tbody>
+        ${g.subs.map((s) => `<tr><td><details><summary><b>${esc(subName(s.id))}</b> <span class="lbl">▾</span></summary><div class="rp-items">${s.items.length ? s.items.map((e) => `<div><span class="lbl">${e.date.slice(8)}/${e.date.slice(5, 7)}${e.note ? " · " + esc(e.note) : ""}</span><span class="num">${fmtDH(e.amount)}</span></div>`).join("") : `<span class="lbl">—</span>`}</div></details></td>
+          <td class="n">${s.count}</td><td class="n">${fmtDH(s.sum)}</td><td class="n">${fmtDH(s.prev)}</td><td class="n ${s.sum - s.prev > 0 ? "up" : s.sum - s.prev < 0 ? "down" : ""}">${s.prev || s.sum ? signDH(Math.round((s.sum - s.prev) * 100) / 100) : "—"}</td></tr>`).join("")}
+        </tbody></table></div></section>`;
+    }).join("");
+    if (rpMode === "month" && !running && store.get("report-seen") !== rpMonth && rpMonth === C.addMonths(thisMonth(), -1) && !$("#v-report").hidden) { store.set("report-seen", rpMonth); renderReportCard(); }
+  }
+  function reportText() {
+    const tree = expTree(), [f, t] = rpRange(), r = rpMode === "month" ? C.monthReport(expenses, rpMonth, tree) : C.periodReport(expenses, f, t, tree), gi = Object.fromEntries(tree.map((g) => [g.id, g]));
+    const plain = (n) => fmtDH(n).replace(/[⁦⁩]/g, "").replace(/ /g, " ");
+    const L = [`📊 ${tr("التقرير")} — ${tr(rpLabel(f, t))}`, `${tr("مجموع المصاريف")}: ${plain(r.total)} DH (${r.count})`];
+    if (r.prevTotal) L.push(`${tr("الفترة السابقة")}: ${plain(r.prevTotal)} DH (${r.diff > 0 ? "+" : "−"}${plain(Math.abs(r.diff))} DH)`);
+    L.push(`${tr("المعدل اليومي")}: ${plain(r.avgPerDay)} DH`, "");
+    r.groups.filter((g) => g.sum > 0).forEach((g) => {
+      L.push(`${gi[g.id].ic || ""} ${tr(gi[g.id].ar)}: ${plain(g.sum)} DH (${g.pct}%)`);
+      g.subs.filter((s) => s.sum > 0).forEach((s) => L.push(`   • ${tr(subName(s.id))}: ${plain(s.sum)} DH × ${s.count}`));
+    });
+    return L.join("\n");
+  }
+  $("#rp-copy").addEventListener("click", async () => {
+    const txt = reportText();
+    try { await navigator.clipboard.writeText(txt); $("#savestate").textContent = "نُسخ التقرير ✓"; }
+    catch (e) { const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); $("#savestate").textContent = "نُسخ التقرير ✓"; } catch (e2) {} ta.remove(); }
+  });
+  function rpStep(dir) {
+    if (rpMode === "month") { const n = C.addMonths(rpMonth, dir); if (dir < 0 || n <= thisMonth()) rpMonth = n; }
+    else if (rpMode === "week") { const n = C.addDays(rpAnchor, 7 * dir); if (dir < 0 || n <= C.addDays(today(), 6)) rpAnchor = n; }
+    else if (rpMode === "year") { const y = Number(rpAnchor.slice(0, 4)) + dir; if (dir < 0 || y <= Number(today().slice(0, 4))) rpAnchor = y + rpAnchor.slice(4); }
+    renderReport();
+  }
+  $("#rp-prev").addEventListener("click", () => rpStep(-1));
+  $("#rp-next").addEventListener("click", () => rpStep(1));
+  function renderReportCard() {
+    const last = C.addMonths(thisMonth(), -1), has = expenses.some((e) => C.monthOf(e.date) === last);
+    const show = has && store.get("report-seen") !== last;
+    $("#home-report").hidden = !show;
+    if (show) $("#home-report-t").textContent = `تقرير مصاريف ${monthName(last)} جاهز`;
+  }
+  const openReportCard = () => { rpMode = "month"; $$(".rp-modes [data-rpm]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.rpm === "month"))); $("#rp-custom").hidden = true; rpMonth = C.addMonths(thisMonth(), -1); go("report"); };
+  $("#home-report").addEventListener("click", openReportCard);
+  $("#home-report").addEventListener("keydown", (e) => { if (e.key === "Enter") openReportCard(); });
+  async function syncReportNative() {
+    if (!LN) return;
+    await cancelWhere((x) => !!x.report);
+    if (!(await lnInit())) return;
+    const d = new Date(), at = new Date(d.getFullYear(), d.getMonth() + 1, 1, 9, 0);
+    try { await lnSchedule({ notifications: [{ id: 777001, title: `📊 تقرير مصاريف ${monthName(thisMonth())} جاهز`, body: "اضغط لعرض التقرير المفصل لكل فئة وتصنيف", channelId: "bills", schedule: { at, allowWhileIdle: true }, extra: { report: thisMonth() } }] }); } catch (e) {}
+  }
+
   // ---------- Bills / recurring payments
   let bills = jget("bills", []);
   const saveBills = () => { store.set("bills", JSON.stringify(bills)); syncBillsNative(); setTimeout(renderExp, 0); };
@@ -1733,12 +1878,12 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   async function boot() {
     await loadDay(today()); await openDay(cur);
     renderHome(); renderWeek(); renderMin(); renderSup(); renderCmp(); checkAlarms();
-    renderMeals(); openMed(null); renderHomeRoutine(); renderShop();
+    renderMeals(); openMed(null); renderHomeRoutine(); renderShop(); renderReportCard();
     fillSubSelect($("#x-sub"), store.get("exp-last-sub") || ""); if (!store.get("exp-last-sub")) $("#x-sub").value = ""; showChosen(); $("#x-date").value = today(); renderAgain(); renderExp(); renderHomeExp(); openBill(null);
     if (NATIVE) {
       $("#alarm-note").textContent = "يرنّ المنبه في الهاتف عند ساعة البداية حتى لو كان التطبيق مغلقًا. في المرة الأولى سيطلب منك التطبيق إذن الإشعارات.";
       $$(".kpi .d").forEach((d) => { if (d.textContent.includes("مفتوحة")) d.textContent = "ترنّ حتى لو كان التطبيق مغلقًا"; });
-      syncNativeAhead(); syncBillsNative(); syncRoutineNative();
+      syncNativeAhead(); syncBillsNative(); syncRoutineNative(); syncReportNative();
     }
   }
   boot();

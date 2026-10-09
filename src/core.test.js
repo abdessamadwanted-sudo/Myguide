@@ -227,6 +227,25 @@ test("Routine: médicaments (durée, jours ouvrables) et liste du jour", () => {
   const r = C.routineFor([{ id: "a", name: "الفطور", time: "08:30", food: "", alarm: false }], [med], "2026-10-09");
   assert.deepEqual(r.map((x) => x.key), ["med:d1@08:00", "meal:a", "med:d1@20:00"]);
 });
+test("Rapport mensuel: groupes, sous-catégories, comparaison, jour le plus cher", () => {
+  const e = [
+    { date: "2026-09-01", sub: "rent", amount: 2500 }, { date: "2026-09-03", sub: "veg", amount: 40 }, { date: "2026-09-03", sub: "fruit", amount: 20 },
+    { date: "2026-09-20", sub: "veg", amount: 30 }, { date: "2026-08-02", sub: "rent", amount: 2500 }, { date: "2026-08-05", sub: "veg", amount: 100 },
+  ];
+  const r = C.monthReport(e, "2026-09", TREE);
+  assert.equal(r.total, 2590); assert.equal(r.count, 4); assert.equal(r.prevTotal, 2600); assert.equal(r.diff, -10);
+  assert.deepEqual(r.groups.map((g) => [g.id, g.sum, g.pct]), [["home", 2500, 96.5], ["food", 90, 3.5]]);
+  assert.deepEqual(r.groups[1].subs.map((s) => [s.id, s.sum, s.count, s.prev]), [["veg", 70, 2, 100], ["fruit", 20, 1, 0]]);
+  assert.deepEqual(r.maxDay, { date: "2026-09-01", sum: 2500 });
+  assert.equal(r.days, 30); assert.equal(r.avgPerDay, 86.33);
+});
+test("Rapport sur période libre, comparé à la période précédente", () => {
+  const e = [{ date: "2026-10-01", sub: "veg", amount: 10 }, { date: "2026-10-05", sub: "fruit", amount: 5 }, { date: "2026-09-28", sub: "veg", amount: 20 }, { date: "2026-10-09", sub: "veg", amount: 99 }];
+  const r = C.periodReport(e, "2026-10-01", "2026-10-07", TREE);
+  assert.equal(r.days, 7); assert.equal(r.total, 15); assert.equal(r.count, 2);
+  assert.deepEqual([r.prevFrom, r.prevTo, r.prevTotal], ["2026-09-24", "2026-09-30", 20]);
+  assert.deepEqual(r.groups[0].subs.map((s) => [s.id, s.sum, s.prev]), [["veg", 10, 20], ["fruit", 5, 0]]);
+});
 test("Recherche: synonymes, accents et filtre catégorie", () => {
   assert.equal(C.searchSupplements(SUPPLEMENTS, "creatine")[0].id, "creatine-monohydrate");
   assert.ok(C.searchSupplements(SUPPLEMENTS, "glycinate").some((s) => s.id === "magnesium"));
