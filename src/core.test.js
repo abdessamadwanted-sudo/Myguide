@@ -100,6 +100,29 @@ test("Calendrier: statut passé / en cours / à venir", () => {
   assert.equal(C.eventStatus(e, C.toMin("10:00")), "live");
   assert.equal(C.eventStatus(e, C.toMin("12:00")), "done");
 });
+test("Profil: IMC, catégorie et fourchette de poids sain", () => {
+  const s = C.bodyStats({ heightCm: 175, weightKg: 60, age: 28, sex: "h", activity: "modere", goal: "prise" });
+  assert.equal(s.bmi, 19.6);
+  assert.equal(s.category.id, "normal");
+  assert.equal(s.healthyMin, 56.7);
+  assert.equal(s.healthyMax, 76.3);
+  assert.equal(C.bmiCategory(18.4).id, "maigreur");
+  assert.equal(C.bmiCategory(30).id, "obesite");
+});
+test("Profil: Mifflin-St Jeor + activité + objectif", () => {
+  const s = C.bodyStats({ heightCm: 175, weightKg: 60, age: 28, sex: "h", activity: "modere", goal: "prise" });
+  assert.equal(s.bmr, 1559);
+  assert.equal(s.tdee, 2416);
+  assert.equal(s.target, 2816);
+  const f = C.bodyStats({ heightCm: 165, weightKg: 58, age: 30, sex: "f", activity: "sedentaire", goal: "maintien" });
+  assert.equal(f.bmr, 1300);
+  assert.equal(f.waterL, 2.0);
+});
+test("Profil: valeurs invalides refusées, mineurs exclus", () => {
+  assert.equal(C.bodyStats({ heightCm: 175, weightKg: 60, age: 16, sex: "h", activity: "modere" }), null);
+  assert.equal(C.validateProfile({ heightCm: 90, weightKg: 60, age: 30, sex: "h", activity: "modere" }).ok, false);
+  assert.equal(C.validateProfile({ heightCm: 175, weightKg: 60, age: 30, sex: "x", activity: "modere" }).ok, false);
+});
 test("Recherche: synonymes, accents et filtre catégorie", () => {
   assert.equal(C.searchSupplements(SUPPLEMENTS, "creatine")[0].id, "creatine-monohydrate");
   assert.ok(C.searchSupplements(SUPPLEMENTS, "glycinate").some((s) => s.id === "magnesium"));

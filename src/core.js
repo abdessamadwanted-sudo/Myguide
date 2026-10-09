@@ -167,13 +167,52 @@
     return (list || []).filter((e) => e.alarm && toMin(e.start) !== null && nowMin >= toMin(e.start) && nowMin - toMin(e.start) < 2 && !fired.has(e.id + "@" + e.start));
   }
 
+  // ---- Profil corporel : IMC (OMS), Mifflin-St Jeor, besoins énergétiques, eau (EFSA)
+  const ACTIVITY = { sedentaire: 1.2, leger: 1.375, modere: 1.55, actif: 1.725, tres_actif: 1.9 };
+  const GOAL_DELTA = { perte: -400, maintien: 0, prise: 400 };
+  function validateProfile(p) {
+    const errors = [];
+    const n = (v) => typeof v === "number" && Number.isFinite(v);
+    if (!n(p.heightCm) || p.heightCm < 120 || p.heightCm > 230) errors.push("الطول خاصو يكون بين 120 و 230 cm");
+    if (!n(p.weightKg) || p.weightKg < 30 || p.weightKg > 250) errors.push("الوزن خاصو يكون بين 30 و 250 kg");
+    if (!n(p.age) || p.age < 18 || p.age > 100) errors.push("الحسابات هنا للبالغين: العمر بين 18 و 100");
+    if (!["h", "f"].includes(p.sex)) errors.push("ختار الجنس");
+    if (!ACTIVITY[p.activity]) errors.push("ختار مستوى النشاط");
+    return { ok: errors.length === 0, errors };
+  }
+  function bmiCategory(bmi) {
+    if (bmi < 18.5) return { id: "maigreur", ar: "وزن ناقص", level: "warn" };
+    if (bmi < 25) return { id: "normal", ar: "وزن طبيعي", level: "good" };
+    if (bmi < 30) return { id: "surpoids", ar: "وزن زايد", level: "warn" };
+    return { id: "obesite", ar: "سمنة", level: "bad" };
+  }
+  function bodyStats(p) {
+    if (!validateProfile(p).ok) return null;
+    const m = p.heightCm / 100;
+    const bmi = p.weightKg / (m * m);
+    const bmr = 10 * p.weightKg + 6.25 * p.heightCm - 5 * p.age + (p.sex === "h" ? 5 : -161);
+    const tdee = bmr * ACTIVITY[p.activity];
+    const goal = GOAL_DELTA[p.goal] !== undefined ? p.goal : "maintien";
+    return {
+      bmi: Math.round(bmi * 10) / 10,
+      category: bmiCategory(bmi),
+      healthyMin: Math.round(18.5 * m * m * 10) / 10,
+      healthyMax: Math.round(24.9 * m * m * 10) / 10,
+      bmr: Math.round(bmr),
+      tdee: Math.round(tdee),
+      target: Math.round(tdee + GOAL_DELTA[goal]),
+      goal,
+      waterL: p.sex === "h" ? 2.5 : 2.0,
+    };
+  }
+
   function eventStatus(e, nowMin) {
     if (nowMin >= toMin(e.end)) return "done";
     if (nowMin >= toMin(e.start)) return "live";
     return "next";
   }
 
-  const api = { TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
+  const api = { ACTIVITY, validateProfile, bmiCategory, bodyStats, TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.SuppCore = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -58,7 +58,7 @@ a { color: var(--accent); }
 .btn.pri { background: var(--accent); border-color: var(--accent); color: #07140C; font-weight: 600; }
 .btn.danger { color: var(--bad); }
 .icon-btn { width: 34px; height: 34px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line-2); cursor: pointer; display: grid; place-items: center; flex: none; }
-input[type=search], input[type=text], input[type=time], input[type=date], select, textarea { background: var(--bg); border: 1px solid var(--line-2); border-radius: 6px; padding: 7px 10px; min-width: 0; }
+input[type=search], input[type=text], input[type=number], input[type=time], input[type=date], select, textarea { background: var(--bg); border: 1px solid var(--line-2); border-radius: 6px; padding: 7px 10px; min-width: 0; }
 textarea { resize: vertical; min-height: 60px; width: 100%; }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .filters input[type=search] { flex: 1 1 200px; }
@@ -119,6 +119,30 @@ td.best { color: var(--accent); font-weight: 600; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .76rem; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+/* Profile */
+.prof { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 0; }
+@media (max-width: 760px) { .prof { grid-template-columns: minmax(0, 1fr); } }
+.prof-form { padding: 14px; display: grid; gap: 10px; border-inline-end: 1px solid var(--line); }
+@media (max-width: 760px) { .prof-form { border-inline-end: 0; border-bottom: 1px solid var(--line); } }
+.prof-form .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.prof-form label { display: grid; gap: 4px; font-size: .76rem; color: var(--muted); }
+.prof-form input, .prof-form select { width: 100%; }
+.prof-out { padding: 14px; display: grid; gap: 12px; align-content: start; }
+.bmi-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.bmi-top .v { font-family: var(--mono); font-size: 2rem; font-weight: 500; line-height: 1; }
+.scale { position: relative; height: 8px; border-radius: 4px; display: flex; overflow: hidden; }
+.scale i { display: block; height: 100%; }
+.scale-wrap { position: relative; padding-top: 4px; }
+.scale-mark { position: absolute; top: -2px; width: 3px; height: 16px; border-radius: 2px; background: var(--ink); transform: translateX(-50%); box-shadow: 0 0 0 2px var(--panel); }
+.scale-lbl { position: relative; height: 14px; font-family: var(--mono); font-size: .66rem; color: var(--faint); margin-top: 4px; }
+.scale-lbl span { position: absolute; transform: translateX(-50%); }
+.scale-lbl span:first-child { transform: none; }
+.scale-lbl span:last-child { transform: translateX(-100%); }
+.stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.stat-grid div { background: var(--panel-2); border-radius: 6px; padding: 8px 10px; display: grid; gap: 2px; min-width: 0; }
+.stat-grid b { direction: ltr; unicode-bidi: isolate; text-align: right; font-family: var(--mono); font-size: 1.05rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.stat-grid .d { font-size: .7rem; color: var(--muted); }
 
 /* Facts (supplement detail) */
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
@@ -184,6 +208,27 @@ td.best { color: var(--accent); font-weight: 600; }
 
   <!-- لوحة القيادة -->
   <section class="page view" id="v-home">
+    <div class="panel" id="prof-panel"><header><h2>معطياتي</h2><span class="lbl" id="prof-saved"></span></header>
+      <div class="prof">
+        <form class="prof-form" id="prof-form" novalidate>
+          <div class="grid3">
+            <label>الطول (cm)<input type="number" inputmode="numeric" id="p-h" min="120" max="230" placeholder="175"></label>
+            <label>الوزن (kg)<input type="number" inputmode="decimal" step="0.1" id="p-w" min="30" max="250" placeholder="65"></label>
+            <label>العمر<input type="number" inputmode="numeric" id="p-a" min="18" max="100" placeholder="28"></label>
+          </div>
+          <div class="grid3">
+            <label>الجنس<select id="p-s"><option value="h">ذكر</option><option value="f">أنثى</option></select></label>
+            <label>النشاط<select id="p-act">
+              <option value="sedentaire">قليل (خدمة جالس)</option><option value="leger">خفيف (1–3 مرات/سيمانة)</option>
+              <option value="modere" selected>متوسط (3–5 مرات)</option><option value="actif">كثير (6–7 مرات)</option><option value="tres_actif">بزاف (خدمة بدنية + تدريب)</option></select></label>
+            <label>الهدف<select id="p-goal"><option value="prise">زيادة الوزن</option><option value="maintien" selected>الحفاظ</option><option value="perte">نقص الوزن</option></select></label>
+          </div>
+          <ul class="errs" id="p-errs"></ul>
+          <button type="submit" class="btn pri" style="justify-self:start">حسب وسجل</button>
+        </form>
+        <div class="prof-out" id="prof-out"><p class="muted">عمر الطول والوزن والعمر باش تشوف الحالة ديالك.</p></div>
+      </div>
+    </div>
     <div class="kpis">
       <div class="kpi"><span class="lbl">مواعيد اليوم</span><span class="v" id="k-count">0</span><span class="d" id="k-next">ما كاين حتى موعد</span></div>
       <div class="kpi"><span class="lbl">الوقت المخطط اليوم</span><span class="v" id="k-hours">0<small> س</small></span><div class="meter"><i id="k-hours-m" style="width:0"></i></div></div>
@@ -498,6 +543,51 @@ td.best { color: var(--accent); font-weight: 600; }
     });
     const d = new Date(); $("#clock").textContent = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
+
+  // ---------- Profile (stored on this phone only)
+  const loadProf = () => { try { return JSON.parse(store.get("profile") || "null"); } catch (e) { return null; } };
+  function readProfForm() {
+    const num = (id) => { const v = parseFloat(String($(id).value).replace(",", ".")); return Number.isFinite(v) ? v : NaN; };
+    return { heightCm: num("#p-h"), weightKg: num("#p-w"), age: num("#p-a"), sex: $("#p-s").value, activity: $("#p-act").value, goal: $("#p-goal").value };
+  }
+  function renderProf(p) {
+    const s = p && C.bodyStats(p);
+    if (!s) { $("#prof-out").innerHTML = `<p class="muted">عمر الطول والوزن والعمر باش تشوف الحالة ديالك.</p>`; return; }
+    const cls = { good: "g", warn: "y", bad: "r" }[s.category.level];
+    const lo = 15, hi = 35, pos = Math.max(0, Math.min(100, ((s.bmi - lo) / (hi - lo)) * 100));
+    const zone = (a, b, c) => `<i style="width:${((b - a) / (hi - lo)) * 100}%;background:${c}"></i>`;
+    let diff = "";
+    if (p.weightKg < s.healthyMin) diff = `باقي ليك <b class="num">${(s.healthyMin - p.weightKg).toFixed(1)} kg</b> باش توصل للوزن الطبيعي`;
+    else if (p.weightKg > s.healthyMax) diff = `فوق الوزن الطبيعي بـ <b class="num">${(p.weightKg - s.healthyMax).toFixed(1)} kg</b>`;
+    else diff = `فالمجال الطبيعي ديال الطول ديالك`;
+    const goalTxt = { prise: "باش تزيد فالوزن", maintien: "باش تحافظ على الوزن", perte: "باش تنقص فالوزن" }[s.goal];
+    $("#prof-out").innerHTML = `
+      <div class="bmi-top"><span class="lbl">IMC</span><span class="v">${s.bmi}</span><span class="pill ${cls}">${s.category.ar}</span></div>
+      <div class="scale-wrap" dir="ltr"><div class="scale">${zone(15, 18.5, "var(--c3)")}${zone(18.5, 25, "var(--c1)")}${zone(25, 30, "var(--c3)")}${zone(30, 35, "var(--c6)")}</div>
+        <span class="scale-mark" style="left:${pos}%"></span><div class="scale-lbl">${[15, 18.5, 25, 30, 35].map((v) => `<span style="left:${((v - lo) / (hi - lo)) * 100}%">${v}</span>`).join("")}</div></div>
+      <p style="font-size:.85rem">${diff}.</p>
+      <div class="stat-grid">
+        <div><span class="lbl">الوزن الطبيعي</span><b>${s.healthyMin}–${s.healthyMax} kg</b><span class="d">IMC 18.5–24.9</span></div>
+        <div><span class="lbl">السعرات ${goalTxt}</span><b>${s.target} kcal</b><span class="d">${s.goal === "maintien" ? "فالنهار" : (s.goal === "prise" ? "+400" : "−400") + " على الحفاظ"}</span></div>
+        <div><span class="lbl">الحفاظ على الوزن (TDEE)</span><b>${s.tdee} kcal</b><span class="d">مع النشاط ديالك</span></div>
+        <div><span class="lbl">الأيض الأساسي (BMR)</span><b>${s.bmr} kcal</b><span class="d">Mifflin-St Jeor</span></div>
+        <div><span class="lbl">الماء فالنهار</span><b>${s.waterL} L</b><span class="d">من الشرب والماكلة (EFSA)</span></div>
+        <div><span class="lbl">العمر · الطول</span><b>${p.age} · ${p.heightCm} cm</b><span class="d">${p.sex === "h" ? "ذكر" : "أنثى"}</span></div>
+      </div>
+      <p class="lbl">تقديرات عامة للبالغين، ماشي تشخيص. IMC ما كيفرقش بين العضلات والدهون.</p>`;
+  }
+  (function initProf() {
+    const p = loadProf();
+    if (p) { $("#p-h").value = p.heightCm; $("#p-w").value = p.weightKg; $("#p-a").value = p.age; $("#p-s").value = p.sex; $("#p-act").value = p.activity; $("#p-goal").value = p.goal || "maintien"; $("#prof-saved").textContent = "مسجل فالتيليفون"; }
+    renderProf(p);
+  })();
+  $("#prof-form").addEventListener("submit", (x) => {
+    x.preventDefault();
+    const p = readProfForm(), v = C.validateProfile(p);
+    if (!v.ok) { $("#p-errs").innerHTML = v.errors.map((t) => `<li>${t}</li>`).join(""); return; }
+    $("#p-errs").innerHTML = ""; store.set("profile", JSON.stringify(p));
+    $("#prof-saved").textContent = "تسجل ✓"; renderProf(p);
+  });
 
   // ---------- Dashboard
   function renderHome() {
