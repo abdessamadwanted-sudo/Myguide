@@ -5,7 +5,8 @@ const src = (f) => readFileSync(new URL("../src/" + f, import.meta.url), "utf8")
 const body = src("page.html")
   .replace("/*CORE*/", () => src("core.js"))
   .replace("/*DATA*/", () => src("data.js"))
-  .replace("/*MIN*/", () => src("minerals.js"));
+  .replace("/*MIN*/", () => src("minerals.js"))
+  .replace("/*I18N*/", () => src("i18n.js"));
 
 const html = `<!doctype html>
 <html lang="ar" dir="rtl">

@@ -46,7 +46,7 @@
 .theme-btn .sw { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(127,127,127,.35); position: relative; overflow: hidden; }
 .theme-btn .sw i { position: absolute; inset: 50% 0 0 0; }
 * { box-sizing: border-box; }
-html, body { background: var(--bg); color: var(--ink); overflow-x: hidden; max-width: 100%; }
+html, body { background: var(--bg); color: var(--ink); overflow-x: clip; max-width: 100%; }
 body { font-family: var(--body); font-size: 14px; line-height: 1.55; }
 h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.3; font-weight: 600; }
 h1 { font-size: 1.35rem; }
@@ -178,6 +178,13 @@ td.best { color: var(--accent); font-weight: 600; }
 .stat-grid b { direction: ltr; unicode-bidi: isolate; text-align: right; font-family: var(--mono); font-size: 1.05rem; font-weight: 500; font-variant-numeric: tabular-nums; }
 .stat-grid .d { font-size: .7rem; color: var(--muted); }
 
+.langs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px 6px 8px; }
+.lang-btn { background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px; cursor: pointer; font-size: .85rem; }
+.lang-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); font-weight: 600; }
+/* LTR (fr/en/es): menu on the left */
+html[dir="ltr"] .side { right: auto; left: 0; border-left: 0; border-right: 1px solid var(--line); }
+@media (min-width: 960px) { html[dir="ltr"] .main { margin-right: 0; margin-left: 248px; } }
+@media (max-width: 959px) { html[dir="ltr"] .side { transform: translateX(-100%); } html[dir="ltr"] .side.open { transform: none; } }
 /* Expenses */
 .m-label { min-width: 120px; text-align: center; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -187,6 +194,7 @@ td.best { color: var(--accent); font-weight: 600; }
 #x-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px; }
 details.grp { --gc: var(--accent); border: 1px solid color-mix(in srgb, var(--gc) 45%, transparent); background: color-mix(in srgb, var(--gc) 10%, var(--panel)); border-radius: 12px; min-width: 0; }
 details.grp[open] { grid-column: 1 / -1; }
+details.grp[open] > summary { position: sticky; top: var(--tbh, 64px); z-index: 5; background: color-mix(in srgb, var(--gc) 16%, var(--panel)); border-radius: 12px 12px 0 0; border-bottom: 1px solid color-mix(in srgb, var(--gc) 40%, transparent); box-shadow: 0 6px 12px -8px rgba(0,0,0,.5); }
 details.grp > summary .ic { font-size: 1.3rem; line-height: 1; }
 details.grp > summary .nm { color: var(--ink); }
 details.grp > summary .amt-l { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 6px; }
@@ -334,6 +342,8 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   <button class="nav" data-tab="src"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6M9 14h6"/></svg>المصادر</button>
   <div class="sec">المظهر</div>
   <div class="themes" id="themes" role="group" aria-label="المظهر"></div>
+  <div class="sec">اللغة</div>
+  <div class="langs" id="langs" role="group" aria-label="اللغة"></div>
   <div class="foot">محتوى تعليمي، ولا يغني عن استشارة الطبيب أو الصيدلي.</div>
 </aside>
 <div class="scrim" id="scrim" hidden></div>
@@ -570,7 +580,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
 
 
   <!-- المعادن -->
-  <section class="page view" id="v-min" hidden>
+  <section class="page view" id="v-min" hidden data-noi18n>
     <div class="filters">
       <input type="search" id="m-q" placeholder="ابحث عن معدن، مصدر (عدس، سمك…) أو عَرَض" aria-label="بحث">
       <div class="seg" role="group" aria-label="الفئة"><button aria-pressed="true" data-g="all">الكل</button><button aria-pressed="false" data-g="macro">Macro</button><button aria-pressed="false" data-g="oligo">Oligo</button></div>
@@ -581,7 +591,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   </section>
 
   <!-- المكملات -->
-  <section class="page view" id="v-sup" hidden>
+  <section class="page view" id="v-sup" hidden data-noi18n>
     <div class="filters">
       <input type="search" id="q" placeholder="ابحث: créatine، whey، magnésium…" aria-label="بحث">
       <select id="cat" aria-label="الفئة"><option value="all">جميع الفئات</option></select>
@@ -592,7 +602,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   </section>
 
   <!-- المقارنة -->
-  <section class="page view" id="v-cmp" hidden>
+  <section class="page view" id="v-cmp" hidden data-noi18n>
     <div class="filters"><div class="seg" role="group" aria-label="نوع المنتج"><button aria-pressed="true" data-t="whey">Whey</button><button aria-pressed="false" data-t="creatine">Créatine</button></div>
       <span class="lbl">عند نقص المعلومة نكتب «غير متوفر». الأخضر = أفضل قيمة متوفرة.</span></div>
     <div class="panel"><header><h2>مقارنة المنتجات</h2><span class="pill y lat">EXEMPLE</span></header>
@@ -610,6 +620,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
 <script>/*CORE*/</script>
 <script>/*DATA*/</script>
 <script>/*MIN*/</script>
+<script>/*I18N*/</script>
 <script>
 (function () {
   const C = window.SuppCore, D = window.SuppData, M = window.MinData;
@@ -617,6 +628,10 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   const $$ = (s) => [...document.querySelectorAll(s)];
   const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  const LANG = window.I18N && I18N.LANGS[store.get("lang")] ? store.get("lang") : "ar";
+  const RTL = LANG === "ar";
+  const tr = (s) => (window.I18N ? I18N._T(s, LANG) : s);
+  if (window.I18N) I18N.apply(LANG);
   const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
   const MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "ماي", "يونيو", "يوليوز", "غشت", "شتنبر", "أكتوبر", "نونبر", "دجنبر"];
   // Ringtones: files in www/sounds (preview) and android res/raw (real alarm). "default" = phone's own notification sound.
@@ -672,6 +687,10 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   }
   $("#themes").innerHTML = THEMES.map((t) => `<button class="theme-btn" data-theme="${t.id}" aria-pressed="false"><span class="sw" style="background:${t.bg}"><i style="background:${t.ac}"></i></span>${t.ar}</button>`).join("");
   $$("#themes .theme-btn").forEach((b) => b.addEventListener("click", () => setTheme(b.dataset.theme)));
+  if (window.I18N) {
+    $("#langs").innerHTML = Object.entries(I18N.LANGS).map(([id, name]) => `<button class="lang-btn" data-lang="${id}" aria-pressed="${id === LANG}" data-noi18n>${name}</button>`).join("");
+    $$("#langs .lang-btn").forEach((b) => b.addEventListener("click", () => { if (b.dataset.lang === LANG) return; store.set("lang", b.dataset.lang); location.reload(); }));
+  }
   setTheme(document.documentElement.dataset.theme || "night");
 
   // ---------- Back: swipe left→right or phone back button. Steps back page by page; at the first page it opens the menu.
@@ -696,7 +715,8 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       if (!ok) return; ok = false;
       const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
       if (Date.now() - st > 800 || Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.6) return;
-      if (dx < 0) { if (!$("#side").classList.contains("open")) setDrawer(true); }
+      const openGesture = RTL ? dx < 0 : dx > 0;
+      if (openGesture) { if (!$("#side").classList.contains("open")) setDrawer(true); }
       else goBack();
     }, { passive: true });
   })();
@@ -745,6 +765,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   // ---------- Native alarms (Android app via Capacitor): ring even when the app is closed
   const LN = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins ? window.Capacitor.Plugins.LocalNotifications : null;
   const NATIVE = !!LN;
+  const lnSchedule = (o) => LN.schedule({ notifications: o.notifications.map((n) => ({ ...n, title: tr(n.title), body: tr(n.body) })) });
   const SNOOZE_MIN = 5;
   let lnReady = null;
   const hashStr = (s) => { let h = 7; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h).toString(36); };
@@ -773,7 +794,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
         try { await LN.createChannel({ id: "bills", name: "الالتزامات والمدفوعات", description: "تذكير بمواعيد الدفع", importance: 4, visibility: 1, vibration: true }); } catch (e) {}
         try { await LN.createChannel({ id: "alarms", name: "المنبهات · نغمة الهاتف", description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80" }); } catch (e) {}
         for (const t of TONES) if (t.id !== "default") { try { await LN.createChannel({ id: "alarm_" + t.id, name: "المنبهات · " + t.ar, description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80", sound: "tone_" + t.id + ".wav" }); } catch (e) {} }
-        try { await LN.registerActionTypes({ types: [{ id: "MED", actions: [{ id: "taken", title: "تم التناول" }, { id: "snooze", title: "تذكير بعد 10 دقائق" }] }, { id: "ALARM", actions: [{ id: "snooze", title: `تذكير بعد ${SNOOZE_MIN} دقائق` }, { id: "stop", title: "إيقاف", destructive: true }] }] }); } catch (e) {}
+        try { await LN.registerActionTypes({ types: [{ id: "MED", actions: [{ id: "taken", title: tr("تم التناول") }, { id: "snooze", title: tr("تذكير بعد 10 دقائق") }] }, { id: "ALARM", actions: [{ id: "snooze", title: tr(`تذكير بعد ${SNOOZE_MIN} دقائق`) }, { id: "stop", title: tr("إيقاف"), destructive: true }] }] }); } catch (e) {}
         return true;
       } catch (e) { return false; }
     })();
@@ -785,11 +806,11 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
         const n = a.notification || {}, x = n.extra || {};
         if (a.actionId === "taken" && x.key) { setTaken(x.day || today(), x.key, true); renderHomeRoutine(); renderMeds(); $("#savestate").textContent = "سُجّل التناول ✓"; return; }
         if (a.actionId === "snooze" && x.routine === "med") {
-          try { await LN.schedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, title: n.title || "💊 تذكير", body: "تذكير بعد 10 دقائق", channelId: x.ch || "alarms", actionTypeId: "MED", schedule: { at: new Date(Date.now() + 600000), allowWhileIdle: true }, extra: { ...x } }] }); } catch (e) {}
+          try { await lnSchedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, title: n.title || "💊 تذكير", body: "تذكير بعد 10 دقائق", channelId: x.ch || "alarms", actionTypeId: "MED", schedule: { at: new Date(Date.now() + 600000), allowWhileIdle: true }, extra: { ...x } }] }); } catch (e) {}
           return;
         }
         if (a.actionId === "snooze") {
-          try { await LN.schedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, title: n.title || "⏰ تذكير", body: `تذكير مؤجَّل ${SNOOZE_MIN} دقائق`, channelId: x.ch || "alarms", actionTypeId: "ALARM", schedule: { at: new Date(Date.now() + SNOOZE_MIN * 60000), allowWhileIdle: true }, extra: { ch: x.ch || "alarms", snooze: true } }] }); $("#savestate").textContent = `سيُذكّرك بعد ${SNOOZE_MIN} دقائق`; } catch (e) {}
+          try { await lnSchedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, title: n.title || "⏰ تذكير", body: `تذكير مؤجَّل ${SNOOZE_MIN} دقائق`, channelId: x.ch || "alarms", actionTypeId: "ALARM", schedule: { at: new Date(Date.now() + SNOOZE_MIN * 60000), allowWhileIdle: true }, extra: { ch: x.ch || "alarms", snooze: true } }] }); $("#savestate").textContent = `سيُذكّرك بعد ${SNOOZE_MIN} دقائق`; } catch (e) {}
         } else if (a.actionId === "tap") { go("cal"); }
       });
     } catch (e) {}
@@ -812,7 +833,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
         schedule: { at: new Date(base.getFullYear(), base.getMonth(), base.getDate(), 0, t), allowWhileIdle: true },
         extra: { day: k, ev: e.id, ch: channelOf(e) },
       }))).filter((n) => n.schedule.at.getTime() > now);
-      if (items.length) await LN.schedule({ notifications: items });
+      if (items.length) await lnSchedule({ notifications: items });
     } catch (e) { $("#savestate").textContent = "تعذّرت برمجة المنبه"; }
   }
   async function syncRecsNative() {
@@ -827,7 +848,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
         const on = { hour: s.hour, minute: s.minute }; if (s.weekday) on.weekday = s.weekday;
         items.push({ id: nid("rec:" + r.id, String(i)), ...notifText(r), channelId: channelOf(r), actionTypeId: "ALARM", schedule: { on, allowWhileIdle: true }, extra: { rec: r.id, ch: channelOf(r) } });
       }));
-      if (items.length) await LN.schedule({ notifications: items });
+      if (items.length) await lnSchedule({ notifications: items });
     } catch (e) { $("#savestate").textContent = "تعذّرت برمجة المنبه المتكرر"; }
   }
   async function syncNativeAhead() {
@@ -979,7 +1000,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       <button class="btn" id="toast-snooze">تذكير بعد ${SNOOZE_MIN} د</button><button class="btn pri" id="toast-stop">إيقاف</button>`;
     t.hidden = false;
     $("#toast-stop").addEventListener("click", () => { stopTone(); t.hidden = true; });
-    $("#toast-snooze").addEventListener("click", () => { stopTone(); t.hidden = true; if (!NATIVE) snoozed.push({ at: Date.now() + SNOOZE_MIN * 60000, e }); else LN.schedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, ...notifText(e), channelId: channelOf(e), actionTypeId: "ALARM", schedule: { at: new Date(Date.now() + SNOOZE_MIN * 60000), allowWhileIdle: true }, extra: { ch: channelOf(e), snooze: true } }] }).catch(() => {}); $("#savestate").textContent = `سيُذكّرك بعد ${SNOOZE_MIN} دقائق`; });
+    $("#toast-snooze").addEventListener("click", () => { stopTone(); t.hidden = true; if (!NATIVE) snoozed.push({ at: Date.now() + SNOOZE_MIN * 60000, e }); else lnSchedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, ...notifText(e), channelId: channelOf(e), actionTypeId: "ALARM", schedule: { at: new Date(Date.now() + SNOOZE_MIN * 60000), allowWhileIdle: true }, extra: { ch: channelOf(e), snooze: true } }] }).catch(() => {}); $("#savestate").textContent = `سيُذكّرك بعد ${SNOOZE_MIN} دقائق`; });
   }
   function checkAlarms() {
     C.dueAlarms(eventsFor(today()).concat(routineEvents()), nowMin(), fired).forEach((e) => { fired.add(e.id + "@" + e._at); ring(e); });
@@ -999,7 +1020,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   function renderMeals() {
     $("#r-count").value = String(meals.length);
     $("#r-meals").innerHTML = meals.map((m, i) => `<div class="meal" data-i="${i}">
-      <input type="text" class="mname" id="ml-n-${i}" value="${esc(m.name)}" maxlength="30" aria-label="اسم الوجبة">
+      <input type="text" class="mname" id="ml-n-${i}" value="${esc(tr(m.name))}" maxlength="30" aria-label="اسم الوجبة">
       <input type="time" id="ml-t-${i}" value="${esc(m.time)}" aria-label="وقت الوجبة">
       <label class="switch mini-sw" title="منبه"><input type="checkbox" id="ml-a-${i}" ${m.alarm ? "checked" : ""} aria-label="منبه ${esc(m.name)}"><span class="tr"></span></label>
       <input type="text" class="food" id="ml-f-${i}" value="${esc(m.food)}" placeholder="ماذا ستأكل؟ مثال: بيض، خبز كامل، موز" maxlength="160" aria-label="محتوى الوجبة">
@@ -1103,7 +1124,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
         if (at.getTime() > now) items.push({ id: nid("med", m.id + t + k), ...base, extra: { ...base.extra, day: k }, schedule: { at, allowWhileIdle: true } });
       }
     }));
-    try { if (items.length) await LN.schedule({ notifications: items }); } catch (e) {}
+    try { if (items.length) await lnSchedule({ notifications: items }); } catch (e) {}
   }
 
   // ---------- Profile (stored on this phone only)
@@ -1181,6 +1202,9 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     $("#clock-d").textContent = `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
   }
   tickClock(); setInterval(tickClock, 1000);
+  // height of the sticky top bar, so pinned headers sit right under it
+  const setTbh = () => { const tb = document.querySelector(".topbar"); if (tb) document.documentElement.style.setProperty("--tbh", tb.getBoundingClientRect().height + "px"); };
+  setTbh(); window.addEventListener("resize", setTbh);
 
   // ---------- Dashboard
   function renderHome() {
@@ -1602,7 +1626,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       if (b.margin > 0 && at1.getTime() > now) items.push({ id: nid("bill:" + b.id, d.period + "a"), title: `💳 ${b.name} · ${fmtDH(b.amount)} درهم`, body: `الاستحقاق بعد ${b.margin} يوم (${fmtDate(d.due)})`, channelId: "bills", schedule: { at: at1, allowWhileIdle: true }, extra: { bill: b.id } });
       if (at2.getTime() > now) items.push({ id: nid("bill:" + b.id, d.period + "b"), title: `💳 اليوم: ${b.name} · ${fmtDH(b.amount)} درهم`, body: "حان موعد الدفع", channelId: "bills", schedule: { at: at2, allowWhileIdle: true }, extra: { bill: b.id } });
     });
-    try { if (items.length) await LN.schedule({ notifications: items }); } catch (e) {}
+    try { if (items.length) await lnSchedule({ notifications: items }); } catch (e) {}
   }
 
   // ---------- Sources
