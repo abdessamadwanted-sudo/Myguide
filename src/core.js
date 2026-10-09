@@ -290,6 +290,52 @@
     return (bills || []).map((b) => ({ b, d: billDue(b, today) })).filter((x) => x.d.status === "overdue" || x.d.status === "soon").sort((a, b) => a.d.days - b.d.days);
   }
 
+  // ---- Routine : repas et médicaments / compléments
+  const MEAL_NAMES = {
+    1: ["الوجبة"], 2: ["الفطور", "العشاء"], 3: ["الفطور", "الغداء", "العشاء"],
+    4: ["الفطور", "الغداء", "اللمجة", "العشاء"], 5: ["الفطور", "وجبة خفيفة صباحية", "الغداء", "اللمجة", "العشاء"],
+    6: ["الفطور", "وجبة خفيفة صباحية", "الغداء", "اللمجة", "العشاء", "وجبة قبل النوم"],
+  };
+  const MEAL_TIMES = { 1: ["13:00"], 2: ["08:00", "20:00"], 3: ["08:00", "13:00", "20:00"], 4: ["08:00", "13:00", "17:00", "20:30"], 5: ["08:00", "10:30", "13:00", "17:00", "20:30"], 6: ["08:00", "10:30", "13:00", "17:00", "20:00", "22:30"] };
+  const ALL_MEAL_NAMES = new Set(Object.values(MEAL_NAMES).flat());
+  // Ajuste la liste des repas au nombre voulu en gardant ce qui est déjà saisi
+  function resizeMeals(items, n) {
+    n = Math.max(1, Math.min(8, Number(n) || 3));
+    const names = MEAL_NAMES[n] || Array.from({ length: n }, (_, i) => `الوجبة ${i + 1}`);
+    const times = MEAL_TIMES[n] || Array.from({ length: n }, (_, i) => fromMin(Math.min(23 * 60, 7 * 60 + i * 120)));
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const old = (items || [])[i];
+      const isDefault = old && !String(old.food || "").trim() && (ALL_MEAL_NAMES.has(old.name) || /^الوجبة \d+$/.test(old.name));
+      if (old && !isDefault) out.push({ ...old });
+      else out.push({ ...(old || {}), id: old ? old.id : "m" + i + "_" + n, name: names[i], time: times[i], food: old ? old.food || "" : "", alarm: old ? !!old.alarm : false });
+    }
+    return out;
+  }
+  function validateMed(m) {
+    const errors = [];
+    if (!m || !String(m.name || "").trim()) errors.push("أدخل اسم الدواء أو المكمل");
+    if (!m || !Array.isArray(m.times) || !m.times.length) errors.push("أضف وقتًا واحدًا على الأقل");
+    else if (m.times.some((t) => toMin(t) === null)) errors.push("أحد الأوقات غير صحيح");
+    if (m && !["daily", "weekdays"].includes(m.repeat)) errors.push("اختر التكرار");
+    if (m && !(Number.isInteger(m.days) && m.days >= 0 && m.days <= 365)) errors.push("المدة بين 0 و365 يومًا (0 = مستمر)");
+    return { ok: errors.length === 0, errors };
+  }
+  // Le médicament est-il à prendre ce jour-là ?
+  function medActiveOn(m, key) {
+    if (!m || !m.start || key < m.start) return false;
+    if (m.days > 0 && dayDiff(m.start, key) >= m.days) return false;
+    if (m.repeat === "weekdays") { const [y, mo, d] = key.split("-").map(Number); const w = new Date(y, mo - 1, d).getDay(); return w >= 1 && w <= 5; }
+    return true;
+  }
+  // Toutes les prises du jour (repas + médicaments), triées par heure
+  function routineFor(meals, meds, key) {
+    const out = [];
+    (meals || []).forEach((m) => out.push({ kind: "meal", key: "meal:" + m.id, id: m.id, name: m.name, time: m.time, detail: m.food || "", alarm: !!m.alarm }));
+    (meds || []).filter((m) => medActiveOn(m, key)).forEach((m) => [...m.times].sort().forEach((t) => out.push({ kind: "med", key: "med:" + m.id + "@" + t, id: m.id, name: m.name, time: t, detail: m.dose || "", alarm: !!m.alarm, type: m.type })));
+    return out.filter((x) => toMin(x.time) !== null).sort((a, b) => toMin(a.time) - toMin(b.time));
+  }
+
   // ---- Profil corporel : IMC (OMS), Mifflin-St Jeor, besoins énergétiques, eau (EFSA)
   const ACTIVITY = { sedentaire: 1.2, leger: 1.375, modere: 1.55, actif: 1.725, tres_actif: 1.9 };
   const GOAL_DELTA = { perte: -400, maintien: 0, prise: 400 };
@@ -342,7 +388,7 @@
     return "next";
   }
 
-  const api = { parseAmount, monthOf, addMonths, validateExpense, expenseSummary, recentItems, dayDiff, validateBill, billDue, upcomingBills, REMIND, EVERY, REPEAT, alarmMin, alarmTimes, ageFrom, occursOn, repeatSlots, ACTIVITY, validateProfile, bmiCategory, bodyStats, TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
+  const api = { resizeMeals, validateMed, medActiveOn, routineFor, parseAmount, monthOf, addMonths, validateExpense, expenseSummary, recentItems, dayDiff, validateBill, billDue, upcomingBills, REMIND, EVERY, REPEAT, alarmMin, alarmTimes, ageFrom, occursOn, repeatSlots, ACTIVITY, validateProfile, bmiCategory, bodyStats, TIME_RE, toMin, fromMin, validateEvent, duration, sortEvents, findOverlaps, eventStatus, summarizeEvents, slotsToEvents, dueAlarms, EVIDENCE, CERT_STATUS, KIND, HOURS, validateGTIN, productMetrics, validateProduct, validateSupplement, searchSupplements, summarizeDay, dateKey, addDays };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.SuppCore = api;
 })(typeof window !== "undefined" ? window : globalThis);

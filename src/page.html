@@ -9,7 +9,7 @@
   --accent: #4ADE80; --accent-dim: rgba(74,222,128,.13);
   --c1: #4ADE80; --c2: #60A5FA; --c3: #F2C14E; --c4: #A78BFA; --c5: #2DD4BF; --c6: #FB7185;
   --warn: #F2C14E; --bad: #FB7185;
-  --on-accent: var(--on-accent); --topbar: rgba(13,15,19,.94); --sky: #7DD3FC;
+  --on-accent: #07140C; --topbar: rgba(13,15,19,.94); --sky: #7DD3FC;
   --body: "IBM Plex Sans Arabic", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   color-scheme: dark;
@@ -216,6 +216,26 @@ details.grp > summary .bar i { display: block; height: 100%; }
 .band-t { height: 12px; background: var(--panel-2); border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
 .band-t i { display: block; height: 100%; border-radius: 6px; }
 .sec-title { font-size: 1.05rem; margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+/* Routine */
+.inline-sel { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--muted); margin-inline-start: auto; }
+.meal { display: grid; grid-template-columns: minmax(0, 1fr) 128px auto; gap: 8px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.meal:last-child { border-bottom: 0; }
+.meal input[type=text].mname { font-weight: 600; }
+.meal .food { grid-column: 1 / -1; width: 100%; }
+.meal input[type=time] { width: 128px; }
+.time-chip { background: var(--accent-dim); color: var(--accent); border: 1px solid transparent; border-radius: 999px; padding: 3px 10px; font-family: var(--mono); font-size: .82rem; display: inline-flex; gap: 6px; align-items: center; direction: ltr; }
+.time-chip button { background: none; border: 0; color: inherit; cursor: pointer; padding: 0; font-size: .9rem; }
+.dose-dots { display: flex; gap: 4px; flex-wrap: wrap; }
+.dose-dot { font-family: var(--mono); font-size: .72rem; border-radius: 4px; padding: 1px 6px; border: 1px solid var(--line-2); color: var(--muted); direction: ltr; }
+.dose-dot.ok { background: var(--accent-dim); color: var(--accent); border-color: transparent; }
+.today-list { display: grid; }
+.today-item { display: grid; grid-template-columns: auto 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--line); }
+.today-item:last-child { border-bottom: 0; }
+.today-item .tm { font-family: var(--mono); color: var(--sky); direction: ltr; }
+.today-item .nm { min-width: 0; }
+.today-item .nm .lbl { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.today-item.done .nm b { text-decoration: line-through; color: var(--muted); }
+.today-item input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); }
 /* Bills */
 .due-list { display: grid; gap: 0; }
 .due-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); align-items: center; }
@@ -306,6 +326,8 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   <section class="page view" id="v-home">
     <div class="panel" id="home-bills" hidden><header><h2>🔔 فواتير يجب أداؤها</h2><button class="btn" data-go="bills">كل الفواتير</button></header>
       <div class="due-list" id="home-bills-list"></div></div>
+    <div class="panel" id="home-routine" hidden><header><h2>🍽 الوجبات والأدوية اليوم</h2><span class="lbl" id="home-routine-sum"></span></header>
+      <div class="today-list" id="home-routine-list"></div></div>
     <div class="kpis">
       <div class="kpi"><span class="lbl">مواعيد اليوم</span><span class="v" id="k-count">0</span><span class="d" id="k-next">لا توجد مواعيد</span></div>
       <div class="kpi"><span class="lbl">الوقت المخطط اليوم</span><span class="v" id="k-hours">0<small> س</small></span><div class="meter"><i id="k-hours-m" style="width:0"></i></div></div>
@@ -400,6 +422,42 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
           </form>
         </div></div>
     </div>
+    <h2 class="sec-title" id="routine-sec">🍽 الوجبات والأدوية</h2>
+    <div class="panel"><header><h2>الوجبات اليومية</h2>
+        <label class="inline-sel">عدد الوجبات <select id="r-count"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></label></header>
+      <div class="body flush" id="r-meals"></div></div>
+    <div class="panel"><header><h2>الأدوية والمكملات</h2><span class="lbl" id="md-count"></span></header>
+      <div class="body flush tw"><table><thead><tr><th>الاسم</th><th>الجرعة</th><th>الأوقات</th><th>اليوم</th><th></th></tr></thead><tbody id="md-table"></tbody></table></div></div>
+    <div class="panel" id="md-panel"><header><h2 id="md-title">إضافة دواء أو مكمل</h2></header>
+      <div class="body">
+        <form class="form" id="md-form" novalidate>
+          <div class="two">
+            <label>الاسم<input type="text" id="md-name" placeholder="مثال: Vitamine D، Créatine" maxlength="60"></label>
+            <label>النوع<select id="md-type"><option value="med">دواء</option><option value="supp">مكمل غذائي</option></select></label>
+          </div>
+          <div class="two">
+            <label>الجرعة<input type="text" id="md-dose" placeholder="مثال: قرص واحد، 5 g" maxlength="40"></label>
+            <label>التكرار<select id="md-repeat"><option value="daily">كل يوم</option><option value="weekdays">أيام العمل (الإثنين–الجمعة)</option></select></label>
+          </div>
+          <div class="two">
+            <label>المدة بالأيام<input type="number" inputmode="numeric" id="md-days" min="0" max="365" value="0"><span class="lbl">0 = مستمر</span></label>
+            <label>تاريخ البداية<input type="date" id="md-start"></label>
+          </div>
+          <div>
+            <span class="lbl">أوقات التناول</span>
+            <div class="chips" id="md-times" style="margin-top:6px"></div>
+            <div class="add-sub" style="margin-top:6px"><input type="time" id="md-time" value="08:00" aria-label="وقت"><button type="button" class="btn" id="md-add-time">+ إضافة وقت</button></div>
+          </div>
+          <label class="switch"><span>تنبيه في كل وقت</span><input type="checkbox" id="md-alarm" checked><span class="tr"></span></label>
+          <ul class="errs" id="md-errs"></ul>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="submit" class="btn pri" id="md-save">إضافة</button>
+            <button type="button" class="btn" id="md-cancel">إلغاء</button>
+            <button type="button" class="btn danger" id="md-del" hidden>حذف</button>
+          </div>
+        </form>
+      </div></div>
+    <p class="note">المعلومات هنا للتنظيم والتذكير فقط. اتبع دائمًا الجرعة التي حددها الطبيب أو الصيدلي.</p>
     <p class="note" id="alarm-note">يرنّ المنبه ويظهر في الأعلى عندما تكون الصفحة مفتوحة. في تطبيق Android يرنّ حتى لو كان التطبيق مغلقًا.</p>
   </section>
 
@@ -677,7 +735,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
         try { await LN.createChannel({ id: "bills", name: "الالتزامات والمدفوعات", description: "تذكير بمواعيد الدفع", importance: 4, visibility: 1, vibration: true }); } catch (e) {}
         try { await LN.createChannel({ id: "alarms", name: "المنبهات · نغمة الهاتف", description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80" }); } catch (e) {}
         for (const t of TONES) if (t.id !== "default") { try { await LN.createChannel({ id: "alarm_" + t.id, name: "المنبهات · " + t.ar, description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80", sound: "tone_" + t.id + ".wav" }); } catch (e) {} }
-        try { await LN.registerActionTypes({ types: [{ id: "ALARM", actions: [{ id: "snooze", title: `تذكير بعد ${SNOOZE_MIN} دقائق` }, { id: "stop", title: "إيقاف", destructive: true }] }] }); } catch (e) {}
+        try { await LN.registerActionTypes({ types: [{ id: "MED", actions: [{ id: "taken", title: "تم التناول" }, { id: "snooze", title: "تذكير بعد 10 دقائق" }] }, { id: "ALARM", actions: [{ id: "snooze", title: `تذكير بعد ${SNOOZE_MIN} دقائق` }, { id: "stop", title: "إيقاف", destructive: true }] }] }); } catch (e) {}
         return true;
       } catch (e) { return false; }
     })();
@@ -687,6 +745,11 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     try {
       LN.addListener("localNotificationActionPerformed", async (a) => {
         const n = a.notification || {}, x = n.extra || {};
+        if (a.actionId === "taken" && x.key) { setTaken(x.day || today(), x.key, true); renderHomeRoutine(); renderMeds(); $("#savestate").textContent = "سُجّل التناول ✓"; return; }
+        if (a.actionId === "snooze" && x.routine === "med") {
+          try { await LN.schedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, title: n.title || "💊 تذكير", body: "تذكير بعد 10 دقائق", channelId: x.ch || "alarms", actionTypeId: "MED", schedule: { at: new Date(Date.now() + 600000), allowWhileIdle: true }, extra: { ...x } }] }); } catch (e) {}
+          return;
+        }
         if (a.actionId === "snooze") {
           try { await LN.schedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, title: n.title || "⏰ تذكير", body: `تذكير مؤجَّل ${SNOOZE_MIN} دقائق`, channelId: x.ch || "alarms", actionTypeId: "ALARM", schedule: { at: new Date(Date.now() + SNOOZE_MIN * 60000), allowWhileIdle: true }, extra: { ch: x.ch || "alarms", snooze: true } }] }); $("#savestate").textContent = `سيُذكّرك بعد ${SNOOZE_MIN} دقائق`; } catch (e) {}
         } else if (a.actionId === "tap") { go("cal"); }
@@ -881,8 +944,119 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     $("#toast-snooze").addEventListener("click", () => { stopTone(); t.hidden = true; if (!NATIVE) snoozed.push({ at: Date.now() + SNOOZE_MIN * 60000, e }); else LN.schedule({ notifications: [{ id: Math.floor(Math.random() * 1e9) + 1, ...notifText(e), channelId: channelOf(e), actionTypeId: "ALARM", schedule: { at: new Date(Date.now() + SNOOZE_MIN * 60000), allowWhileIdle: true }, extra: { ch: channelOf(e), snooze: true } }] }).catch(() => {}); $("#savestate").textContent = `سيُذكّرك بعد ${SNOOZE_MIN} دقائق`; });
   }
   function checkAlarms() {
-    C.dueAlarms(eventsFor(today()), nowMin(), fired).forEach((e) => { fired.add(e.id + "@" + e._at); ring(e); });
+    C.dueAlarms(eventsFor(today()).concat(routineEvents()), nowMin(), fired).forEach((e) => { fired.add(e.id + "@" + e._at); ring(e); });
     for (let i = snoozed.length - 1; i >= 0; i--) if (Date.now() >= snoozed[i].at) { const s = snoozed.splice(i, 1)[0]; ring(s.e); }
+  }
+
+  // ---------- Routine: meals + medicines/supplements (stored on this device)
+  let meals = jget("meals", null) || C.resizeMeals([], 3);
+  let meds = jget("meds", []);
+  let mdEditing = null, mdTimes = [];
+  const takenKey = (k) => "taken-" + k;
+  const getTaken = (k) => jget(takenKey(k), {});
+  function setTaken(k, key, v) { const t = getTaken(k); if (v) t[key] = true; else delete t[key]; store.set(takenKey(k), JSON.stringify(t)); }
+  let mealSaveT = null;
+  function saveMeals() { clearTimeout(mealSaveT); mealSaveT = setTimeout(() => { store.set("meals", JSON.stringify(meals)); syncRoutineNative(); renderHomeRoutine(); $("#savestate").textContent = "حُفظ ✓"; }, 500); }
+  function saveMeds() { store.set("meds", JSON.stringify(meds)); syncRoutineNative(); renderMeds(); renderHomeRoutine(); }
+  function renderMeals() {
+    $("#r-count").value = String(meals.length);
+    $("#r-meals").innerHTML = meals.map((m, i) => `<div class="meal" data-i="${i}">
+      <input type="text" class="mname" id="ml-n-${i}" value="${esc(m.name)}" maxlength="30" aria-label="اسم الوجبة">
+      <input type="time" id="ml-t-${i}" value="${esc(m.time)}" aria-label="وقت الوجبة">
+      <label class="switch mini-sw" title="منبه"><input type="checkbox" id="ml-a-${i}" ${m.alarm ? "checked" : ""} aria-label="منبه ${esc(m.name)}"><span class="tr"></span></label>
+      <input type="text" class="food" id="ml-f-${i}" value="${esc(m.food)}" placeholder="ماذا ستأكل؟ مثال: بيض، خبز كامل، موز" maxlength="160" aria-label="محتوى الوجبة">
+    </div>`).join("");
+    meals.forEach((m, i) => {
+      $("#ml-n-" + i).addEventListener("input", (e) => { m.name = e.target.value; saveMeals(); });
+      $("#ml-t-" + i).addEventListener("change", (e) => { m.time = e.target.value; saveMeals(); });
+      $("#ml-f-" + i).addEventListener("input", (e) => { m.food = e.target.value; saveMeals(); });
+      $("#ml-a-" + i).addEventListener("change", (e) => { m.alarm = e.target.checked; if (m.alarm) { primeAudio(); lnInit(); } saveMeals(); });
+    });
+  }
+  $("#r-count").addEventListener("change", () => { meals = C.resizeMeals(meals, Number($("#r-count").value)); renderMeals(); saveMeals(); });
+
+  function renderMdTimes() {
+    $("#md-times").innerHTML = mdTimes.length ? [...mdTimes].sort().map((t) => `<span class="time-chip">${t}<button type="button" data-rmt="${t}" aria-label="حذف ${t}">×</button></span>`).join("") : `<span class="lbl">لم تُضف أي وقت بعد</span>`;
+    $$("#md-times [data-rmt]").forEach((b) => b.addEventListener("click", () => { mdTimes = mdTimes.filter((x) => x !== b.dataset.rmt); renderMdTimes(); }));
+  }
+  $("#md-add-time").addEventListener("click", () => { const t = $("#md-time").value; if (C.toMin(t) !== null && !mdTimes.includes(t)) { mdTimes.push(t); renderMdTimes(); } });
+  function openMed(id) {
+    const m = id ? meds.find((x) => x.id === id) : null; mdEditing = m ? m.id : null;
+    $("#md-title").textContent = m ? "تعديل الدواء أو المكمل" : "إضافة دواء أو مكمل";
+    $("#md-name").value = m ? m.name : ""; $("#md-type").value = m ? m.type || "med" : "med"; $("#md-dose").value = m ? m.dose || "" : "";
+    $("#md-repeat").value = m ? m.repeat : "daily"; $("#md-days").value = m ? m.days : 0; $("#md-start").value = m ? m.start : today();
+    $("#md-alarm").checked = m ? !!m.alarm : true; mdTimes = m ? [...m.times] : [];
+    $("#md-save").textContent = m ? "حفظ التعديلات" : "إضافة"; $("#md-del").hidden = !m; $("#md-del").dataset.confirm = ""; $("#md-del").textContent = "حذف"; $("#md-errs").innerHTML = "";
+    renderMdTimes(); renderMeds();
+    if (m) $("#md-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  $("#md-cancel").addEventListener("click", () => openMed(null));
+  $("#md-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const t = $("#md-time").value; if (!mdTimes.length && C.toMin(t) !== null) mdTimes.push(t);
+    const data = { name: $("#md-name").value.trim(), type: $("#md-type").value, dose: $("#md-dose").value.trim(), repeat: $("#md-repeat").value, days: parseInt($("#md-days").value, 10) || 0, start: $("#md-start").value || today(), alarm: $("#md-alarm").checked, times: [...mdTimes].sort() };
+    const v = C.validateMed(data);
+    if (!v.ok) { $("#md-errs").innerHTML = v.errors.map((x) => `<li>${x}</li>`).join(""); return; }
+    if (data.alarm) { primeAudio(); lnInit(); }
+    if (mdEditing) Object.assign(meds.find((x) => x.id === mdEditing), data); else meds.push({ id: newId(), ...data });
+    saveMeds(); openMed(null); $("#savestate").textContent = "حُفظ ✓";
+  });
+  $("#md-del").addEventListener("click", () => {
+    if (!mdEditing) return;
+    if ($("#md-del").dataset.confirm !== "1") { $("#md-del").dataset.confirm = "1"; $("#md-del").textContent = "هل أنت متأكد؟ اضغط مرة أخرى"; return; }
+    meds = meds.filter((x) => x.id !== mdEditing); saveMeds(); openMed(null);
+  });
+  function renderMeds() {
+    const k = today(), tk = getTaken(k);
+    $("#md-count").textContent = meds.length ? `${meds.length} عنصر` : "";
+    $("#md-table").innerHTML = meds.length ? meds.map((m) => {
+      const active = C.medActiveOn(m, k);
+      const end = m.days > 0 ? C.addDays(m.start, m.days - 1) : null;
+      return `<tr class="click ${mdEditing === m.id ? "sel" : ""}" data-id="${m.id}">
+        <td><b>${esc(m.name)}</b> <span class="pill ${m.type === "supp" ? "b" : "y"}">${m.type === "supp" ? "مكمل" : "دواء"}</span><div class="lbl">${m.repeat === "weekdays" ? "أيام العمل" : "كل يوم"}${end ? " · حتى " + fmtDate(end) : " · مستمر"}${m.alarm ? " · 🔔" : ""}</div></td>
+        <td>${esc(m.dose || "—")}</td>
+        <td><div class="dose-dots">${m.times.map((t) => `<span class="dose-dot ${active && tk["med:" + m.id + "@" + t] ? "ok" : ""}">${t}</span>`).join("")}</div></td>
+        <td>${active ? `${m.times.filter((t) => tk["med:" + m.id + "@" + t]).length}/${m.times.length}` : `<span class="lbl">لا</span>`}</td>
+        <td><button class="btn" data-edit="${m.id}">تعديل</button></td></tr>`;
+    }).join("") : `<tr><td colspan="5" class="empty">لا توجد أدوية أو مكملات. أضفها من النموذج أدناه.</td></tr>`;
+    $$("#md-table tr.click").forEach((tr) => tr.addEventListener("click", () => openMed(tr.dataset.id)));
+  }
+  function renderHomeRoutine() {
+    const k = today(), list = C.routineFor(meals.filter((m) => m.food || m.alarm), meds, k), tk = getTaken(k);
+    $("#home-routine").hidden = !list.length;
+    const done = list.filter((x) => tk[x.key]).length;
+    $("#home-routine-sum").textContent = list.length ? `${done}/${list.length}` : "";
+    const n = nowMin();
+    $("#home-routine-list").innerHTML = list.map((x, i) => `<label class="today-item ${tk[x.key] ? "done" : ""}">
+      <input type="checkbox" data-rk="${esc(x.key)}" ${tk[x.key] ? "checked" : ""} aria-label="${x.kind === "med" ? "تم التناول" : "تم"}">
+      <span class="tm">${x.time}</span>
+      <span class="nm"><b>${x.kind === "med" ? "💊 " : "🍽 "}${esc(x.name)}</b>${x.detail ? `<span class="lbl">${esc(x.detail)}</span>` : ""}</span>
+      ${!tk[x.key] && C.toMin(x.time) < n ? `<span class="pill y">فات</span>` : x.alarm ? `<span class="lbl">🔔</span>` : `<span></span>`}
+    </label>`).join("");
+    $$("#home-routine-list [data-rk]").forEach((c) => c.addEventListener("change", () => { setTaken(k, c.dataset.rk, c.checked); renderHomeRoutine(); renderMeds(); }));
+  }
+  // Pseudo-events for the in-page alarm (web / app open)
+  const routineEvents = () => C.routineFor(meals, meds, today()).filter((x) => x.alarm).map((x) => ({ id: x.key, title: (x.kind === "med" ? "💊 " : "🍽 ") + x.name + (x.detail ? " · " + x.detail : ""), start: x.time, end: x.time, alarm: true, alarmAt: x.time, tone: x.kind === "med" ? "bell" : "soft" }));
+  async function syncRoutineNative() {
+    if (!LN) return;
+    await cancelWhere((x) => !!x.routine);
+    const mealsOn = meals.filter((m) => m.alarm && C.toMin(m.time) !== null), medsOn = meds.filter((m) => m.alarm);
+    if ((!mealsOn.length && !medsOn.length) || !(await lnInit())) return;
+    const mealCh = { tone: "soft" }, medCh = { tone: "bell" };
+    await ensureChannels([mealCh, medCh]);
+    const items = [], now = Date.now();
+    const hm = (t) => ({ hour: Math.floor(C.toMin(t) / 60), minute: C.toMin(t) % 60 });
+    mealsOn.forEach((m) => items.push({ id: nid("meal", m.id), title: `🍽 ${m.name} · ${m.time}`, body: m.food || "حان وقت الوجبة", channelId: channelOf(mealCh), schedule: { on: hm(m.time), allowWhileIdle: true }, extra: { routine: "meal", ch: channelOf(mealCh) } }));
+    medsOn.forEach((m) => m.times.forEach((t) => {
+      const base = { title: `💊 ${m.name} · ${t}`, body: m.dose ? `الجرعة: ${m.dose}` : "حان وقت التناول", channelId: channelOf(medCh), actionTypeId: "MED", extra: { routine: "med", key: "med:" + m.id + "@" + t, ch: channelOf(medCh) } };
+      if (m.days === 0 && m.repeat === "daily" && m.start <= today()) items.push({ id: nid("med", m.id + t), ...base, schedule: { on: hm(t), allowWhileIdle: true } });
+      else for (let i = 0; i < Math.min(30, m.days || 30); i++) {
+        const k = C.addDays(today(), i); if (!C.medActiveOn(m, k)) continue;
+        const d = parseKey(k), at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, C.toMin(t));
+        if (at.getTime() > now) items.push({ id: nid("med", m.id + t + k), ...base, extra: { ...base.extra, day: k }, schedule: { at, allowWhileIdle: true } });
+      }
+    }));
+    try { if (items.length) await LN.schedule({ notifications: items }); } catch (e) {}
   }
 
   // ---------- Profile (stored on this phone only)
@@ -1333,16 +1507,17 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   async function boot() {
     await loadDay(today()); await openDay(cur);
     renderHome(); renderWeek(); renderMin(); renderSup(); renderCmp(); checkAlarms();
+    renderMeals(); openMed(null); renderHomeRoutine();
     fillSubSelect($("#x-sub"), store.get("exp-last-sub") || "veg"); $("#x-date").value = today(); renderAgain(); renderExp(); renderHomeExp(); openBill(null);
     if (NATIVE) {
       $("#alarm-note").textContent = "يرنّ المنبه في الهاتف عند ساعة البداية حتى لو كان التطبيق مغلقًا. في المرة الأولى سيطلب منك التطبيق إذن الإشعارات.";
       $$(".kpi .d").forEach((d) => { if (d.textContent.includes("مفتوحة")) d.textContent = "ترنّ حتى لو كان التطبيق مغلقًا"; });
-      syncNativeAhead(); syncBillsNative();
+      syncNativeAhead(); syncBillsNative(); syncRoutineNative();
     }
   }
   boot();
   let lastDay = today();
-  setInterval(() => { checkAlarms(); if (cur === today() && !$("#v-cal").hidden) renderCal(); renderHome(); if (today() !== lastDay) { lastDay = today(); renderBills(); renderHomeExp(); } }, 20000);
+  setInterval(() => { checkAlarms(); if (cur === today() && !$("#v-cal").hidden) renderCal(); renderHome(); if (today() !== lastDay) { lastDay = today(); renderBills(); renderHomeExp(); renderMeds(); } renderHomeRoutine(); }, 20000);
   { const t0 = store.get("supp-tab"); go(!t0 || ["min", "sup", "cmp"].includes(t0) ? "home" : t0, true); }
   (async () => {
     try {

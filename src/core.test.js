@@ -205,6 +205,28 @@ test("Échéances: annuelle, unique, liste des proches", () => {
   const up = C.upcomingBills([ins, f, { name: "Gym", amount: 200, freq: "monthly", day: 8, margin: 2, paid: [], since: "2026-10-01" }], "2026-10-09");
   assert.deepEqual(up.map((x) => x.b.name), ["Gym", "Assurance"]);
 });
+test("Routine: nombre de repas, conservation de la saisie", () => {
+  const three = C.resizeMeals([], 3);
+  assert.deepEqual(three.map((m) => m.name), ["الفطور", "الغداء", "العشاء"]);
+  three[0].food = "بيض وخبز";
+  const four = C.resizeMeals(three, 4);
+  assert.equal(four.length, 4); assert.equal(four[0].food, "بيض وخبز");
+  assert.deepEqual(four.map((m) => m.name), ["الفطور", "الغداء", "اللمجة", "العشاء"]);
+  const custom = C.resizeMeals([{ id: "x", name: "وجبتي", time: "09:00", food: "", alarm: true }], 2);
+  assert.equal(custom[0].name, "وجبتي");
+  assert.equal(C.resizeMeals(four, 2).length, 2);
+  assert.equal(C.resizeMeals([], 8).length, 8);
+});
+test("Routine: médicaments (durée, jours ouvrables) et liste du jour", () => {
+  const med = { id: "d1", name: "Vitamine D", dose: "1 قرص", times: ["20:00", "08:00"], repeat: "daily", days: 10, start: "2026-10-01", alarm: true };
+  assert.equal(C.validateMed(med).ok, true);
+  assert.equal(C.validateMed({ ...med, times: [] }).ok, false);
+  assert.equal(C.medActiveOn(med, "2026-10-10"), true);
+  assert.equal(C.medActiveOn(med, "2026-10-11"), false); // 10 jours: 1→10
+  assert.equal(C.medActiveOn({ ...med, repeat: "weekdays", days: 0 }, "2026-10-10"), false); // samedi
+  const r = C.routineFor([{ id: "a", name: "الفطور", time: "08:30", food: "", alarm: false }], [med], "2026-10-09");
+  assert.deepEqual(r.map((x) => x.key), ["med:d1@08:00", "meal:a", "med:d1@20:00"]);
+});
 test("Recherche: synonymes, accents et filtre catégorie", () => {
   assert.equal(C.searchSupplements(SUPPLEMENTS, "creatine")[0].id, "creatine-monohydrate");
   assert.ok(C.searchSupplements(SUPPLEMENTS, "glycinate").some((s) => s.id === "magnesium"));
