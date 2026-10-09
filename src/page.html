@@ -184,19 +184,36 @@ td.best { color: var(--accent); font-weight: 600; }
 .chip-btn { background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 10px; font-size: .78rem; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
 .chip-btn b { font-family: var(--mono); font-weight: 500; color: var(--accent); }
 .chip-btn:hover { border-color: var(--accent); }
-details.grp { border-bottom: 1px solid var(--line); }
-details.grp:last-child { border-bottom: 0; }
-details.grp > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; }
+#x-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px; }
+details.grp { --gc: var(--accent); border: 1px solid color-mix(in srgb, var(--gc) 45%, transparent); background: color-mix(in srgb, var(--gc) 10%, var(--panel)); border-radius: 12px; min-width: 0; }
+details.grp[open] { grid-column: 1 / -1; }
+details.grp > summary .ic { font-size: 1.3rem; line-height: 1; }
+details.grp > summary .nm { color: var(--ink); }
+details.grp > summary .amt-l { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 6px; }
+details.grp > summary .amt-l .amt { font-size: 1.15rem; color: var(--gc); font-weight: 600; }
+details.grp > summary .bar { background: color-mix(in srgb, var(--gc) 18%, transparent); }
+.sub-chosen-w { display: grid; gap: 4px; min-width: 0; }
+.sub-chosen { --gc: var(--accent); display: flex; align-items: center; gap: 6px; min-height: 38px; border-radius: 6px; padding: 6px 10px; border: 1px solid color-mix(in srgb, var(--gc) 55%, transparent); background: color-mix(in srgb, var(--gc) 12%, var(--bg)); color: var(--ink); font-weight: 600; cursor: pointer; text-align: start; min-width: 0; }
+.sub-chosen .g { color: var(--muted); font-weight: 400; font-size: .8rem; }
+.sub-chosen.none { border-style: dashed; color: var(--muted); font-weight: 400; }
+.sub-pick { cursor: pointer; }
+.sub-pick:hover b { text-decoration: underline; }
+.sub.picked { box-shadow: 0 0 0 2px var(--gc, var(--accent)) inset; }
+.rec-box { display: grid; gap: 10px; border: 1px dashed var(--line-2); border-radius: 8px; padding: 10px; }
+details.grp-old { border-bottom: 1px solid var(--line); }
+
+details.grp > summary { list-style: none; cursor: pointer; padding: 12px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 8px; align-items: center; }
 details.grp > summary::-webkit-details-marker { display: none; }
 details.grp > summary .nm { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-details.grp > summary .nm::before { content: "‹"; display: inline-block; color: var(--muted); transition: transform .15s; font-size: 1.1rem; line-height: 1; }
-details.grp[open] > summary .nm::before { transform: rotate(-90deg); }
+details.grp > summary .nm { font-size: .92rem; }
 details.grp > summary .amt { font-family: var(--mono); font-variant-numeric: tabular-nums; direction: ltr; }
 details.grp > summary .bar { grid-column: 1 / -1; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
 details.grp > summary .bar i { display: block; height: 100%; }
-.subs { padding: 0 14px 12px; display: grid; gap: 8px; }
+.subs { padding: 0 12px 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.subs > *, .sub > *, details.grp > summary > * { min-width: 0; }
 .sub { background: var(--panel-2); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; }
-.sub-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sub-h { display: flex; justify-content: space-between; align-items: center; gap: 6px 8px; flex-wrap: wrap; }
+.sub-h > span { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; min-width: 0; }
 .sub-h .amt { font-family: var(--mono); direction: ltr; }
 .sub-list { display: grid; gap: 2px; font-size: .82rem; }
 .sub-list div { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px; align-items: center; padding: 3px 0; border-top: 1px dashed var(--line); }
@@ -204,7 +221,8 @@ details.grp > summary .bar i { display: block; height: 100%; }
 .sub-list .a { font-family: var(--mono); direction: ltr; }
 .x-del { background: none; border: 0; color: var(--faint); cursor: pointer; font-size: 1rem; padding: 0 4px; }
 .x-del:hover { color: var(--bad); }
-.add-sub { display: flex; gap: 6px; }
+.add-sub { display: flex; gap: 6px; flex-wrap: wrap; }
+.add-sub input { min-width: 0; flex: 1 1 140px; }
 .add-sub input { flex: 1; }
 .dh { font-size: .72rem; color: var(--muted); }
 .bands { display: grid; gap: 12px; }
@@ -244,6 +262,8 @@ details.grp > summary .bar i { display: block; height: 100%; }
 .due-row .s { font-size: .76rem; color: var(--muted); }
 .due-row .r { display: flex; gap: 6px; align-items: center; grid-row: span 2; }
 .due-row .a { font-family: var(--mono); direction: ltr; }
+.due-row.click { cursor: pointer; }
+.due-row.sel-row { background: var(--accent-dim); }
 .due-row.late { border-inline-start: 3px solid var(--bad); }
 .due-row.soon { border-inline-start: 3px solid var(--warn); }
 .due-row { border-inline-start: 3px solid var(--line-2); }
@@ -479,14 +499,27 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       <div class="body">
         <form class="form" id="x-form" novalidate>
           <div class="two">
-            <label>الفئة<select id="x-sub"></select></label>
+            <div class="sub-chosen-w"><span class="lbl">الفئة</span><button type="button" class="sub-chosen" id="x-sub-show"></button><select id="x-sub" hidden aria-hidden="true" tabindex="-1"></select></div>
             <label>التاريخ<input type="date" id="x-date"></label>
           </div>
           <label>المبلغ (درهم)<input type="text" inputmode="decimal" id="x-amount" placeholder="0"></label>
           <div class="chips" id="x-again"></div>
           <label>ملاحظة<input type="text" id="x-note" placeholder="اختياري" maxlength="80"></label>
+          <label class="switch"><span>🔔 التزام متكرر (فاتورة، كراء، اشتراك، تأمين…)</span><input type="checkbox" id="x-rec"><span class="tr"></span></label>
+          <div id="x-rec-box" class="rec-box" hidden>
+            <div class="two">
+              <label>الدورية<select id="x-freq"><option value="monthly">شهري</option><option value="yearly">سنوي</option><option value="once">مرة واحدة</option></select></label>
+              <label id="x-day-l">يوم الاستحقاق من كل شهر<input type="number" inputmode="numeric" id="x-day" min="1" max="31" value="1"></label>
+              <label id="x-due-l" hidden>تاريخ الاستحقاق<input type="date" id="x-due"></label>
+            </div>
+            <div class="two">
+              <label>التنبيه قبل (أيام)<input type="number" inputmode="numeric" id="x-margin" min="0" max="60" value="3"></label>
+              <label>الاسم<input type="text" id="x-bname" placeholder="مثال: الكراء" maxlength="60"></label>
+            </div>
+            <label class="switch"><span>أدّيته الآن (يُسجَّل كمصروف اليوم)</span><input type="checkbox" id="x-paidnow"><span class="tr"></span></label>
+          </div>
           <ul class="errs" id="x-errs"></ul>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" class="btn pri">إضافة</button></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" class="btn pri" id="x-save">إضافة</button></div>
         </form>
       </div>
     </div>
@@ -500,8 +533,9 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       <div class="kpi"><span class="lbl">مستحق خلال 30 يومًا</span><span class="v" id="b-30">0</span><span class="d">درهم</span></div>
     </div>
     <div class="panel"><header><h2>قائمة الالتزامات</h2><span class="lbl">مرتبة حسب أقرب استحقاق</span></header>
-      <div class="body flush tw"><table><thead><tr><th>الالتزام</th><th>المبلغ</th><th>الاستحقاق</th><th>الحالة</th><th></th></tr></thead><tbody id="b-table"></tbody></table></div></div>
-    <div class="panel" id="b-panel"><header><h2 id="b-form-title">التزام جديد</h2></header>
+      <div class="due-list" id="b-cards"></div>
+      <div hidden><table><thead><tr><th>الالتزام</th><th>المبلغ</th><th>الاستحقاق</th><th>الحالة</th><th></th></tr></thead><tbody id="b-table"></tbody></table></div></div>
+    <div class="panel" id="b-panel" hidden><header><h2 id="b-form-title">تعديل الالتزام</h2></header>
       <div class="body">
         <form class="form" id="b-form" novalidate>
           <div class="two">
@@ -521,6 +555,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button type="submit" class="btn pri" id="b-save">إضافة</button>
             <button type="button" class="btn" id="b-cancel">إلغاء</button>
+            <button type="button" class="btn" id="b-unpay" hidden>إلغاء آخر أداء</button>
             <button type="button" class="btn danger" id="b-del" hidden>حذف</button>
           </div>
         </form>
@@ -664,7 +699,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   })();
   const APP = window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins.App : null;
   if (APP && APP.addListener) {
-    try { APP.addListener("backButton", () => { if (goBack() === "root") APP.exitApp(); }); } catch (e) {}
+    try { APP.addListener("backButton", () => { goBack(); /* at the dashboard: stay there, never close the app */ }); } catch (e) {}
   }
   $$("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
 
@@ -1274,15 +1309,15 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
 
   // ---------- Expenses (stored on this device)
   const EXP_TREE_BASE = [
-    { id: "home", ar: "السكن", subs: [["rent", "الكراء"], ["utilities", "الماء والكهرباء"], ["internet", "الإنترنت والهاتف"]] },
-    { id: "subs", ar: "الاشتراكات", subs: [["gym", "القاعة الرياضية"], ["apps", "اشتراكات رقمية"], ["sub_other", "اشتراكات أخرى"]] },
-    { id: "food", ar: "التغذية", subs: [["veg", "الخضر"], ["fruit", "الفواكه"], ["meat", "اللحوم والدواجن والأسماك"], ["dairy", "الحليب ومشتقاته والبيض"], ["bread", "الخبز والحبوب"], ["grocery", "البقالة"], ["out", "الأكل خارج المنزل"]] },
-    { id: "health", ar: "الصحة", subs: [["doctor", "الطبيب"], ["pharmacy", "الصيدلية والأدوية"], ["lab", "التحاليل"], ["supp", "المكملات الغذائية"]] },
-    { id: "care", ar: "العناية الشخصية", subs: [["barber", "الحلاق"], ["hygiene", "منتجات النظافة والعناية"]] },
-    { id: "edu", ar: "التكوين والتعليم", subs: [["course", "الدورات التكوينية"], ["books", "الكتب"]] },
-    { id: "transport", ar: "النقل", subs: [["fuel", "الوقود"], ["taxi", "النقل العمومي وسيارات الأجرة"], ["car", "صيانة السيارة"]] },
-    { id: "insurance", ar: "التأمين", subs: [["ins_health", "التأمين الصحي"], ["ins_car", "تأمين السيارة"], ["ins_other", "تأمينات أخرى"]] },
-    { id: "other", ar: "أخرى", subs: [["clothes", "الملابس"], ["fun", "الترفيه"], ["misc", "متفرقات"]] },
+    { id: "home", ic: "🏠", ar: "السكن", subs: [["rent", "الكراء"], ["utilities", "الماء والكهرباء"], ["internet", "الإنترنت والهاتف"]] },
+    { id: "subs", ic: "🔁", ar: "الاشتراكات", subs: [["gym", "القاعة الرياضية"], ["apps", "اشتراكات رقمية"], ["sub_other", "اشتراكات أخرى"]] },
+    { id: "food", ic: "🥗", ar: "التغذية", subs: [["veg", "الخضر"], ["fruit", "الفواكه"], ["meat", "اللحوم والدواجن والأسماك"], ["dairy", "الحليب ومشتقاته والبيض"], ["bread", "الخبز والحبوب"], ["grocery", "البقالة"], ["out", "الأكل خارج المنزل"]] },
+    { id: "health", ic: "🩺", ar: "الصحة", subs: [["doctor", "الطبيب"], ["pharmacy", "الصيدلية والأدوية"], ["lab", "التحاليل"], ["supp", "المكملات الغذائية"]] },
+    { id: "care", ic: "🧴", ar: "العناية الشخصية", subs: [["barber", "الحلاق"], ["hygiene", "منتجات النظافة والعناية"]] },
+    { id: "edu", ic: "🎓", ar: "التكوين والتعليم", subs: [["course", "الدورات التكوينية"], ["books", "الكتب"]] },
+    { id: "transport", ic: "🚗", ar: "النقل", subs: [["fuel", "الوقود"], ["taxi", "النقل العمومي وسيارات الأجرة"], ["car", "صيانة السيارة"]] },
+    { id: "insurance", ic: "🛡️", ar: "التأمين", subs: [["ins_health", "التأمين الصحي"], ["ins_car", "تأمين السيارة"], ["ins_other", "تأمينات أخرى"]] },
+    { id: "other", ic: "🧾", ar: "أخرى", subs: [["clothes", "الملابس"], ["fun", "الترفيه"], ["misc", "متفرقات"]] },
   ];
   const GCOL = ["#4ADE80", "#60A5FA", "#F2C14E", "#A78BFA", "#2DD4BF", "#FB7185", "#7DD3FC", "#FB923C", "#A3E635"];
   let expenses = jget("exp-list", []);
@@ -1290,7 +1325,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
   let hiddenSubs = jget("exp-hidden", []); // default sub ids removed by the user
   const saveExp = () => store.set("exp-list", JSON.stringify(expenses));
   function expTree() {
-    return EXP_TREE_BASE.map((g, i) => ({ id: g.id, ar: g.ar, col: GCOL[i % GCOL.length], subs: g.subs.filter(([id]) => !hiddenSubs.includes(id)).map(([id, ar]) => ({ id, ar })).concat(customSubs.filter((c) => c.group === g.id).map((c) => ({ id: c.id, ar: c.ar, custom: true }))) }));
+    return EXP_TREE_BASE.map((g, i) => ({ id: g.id, ar: g.ar, ic: g.ic, col: GCOL[i % GCOL.length], subs: g.subs.filter(([id]) => !hiddenSubs.includes(id)).map(([id, ar]) => ({ id, ar })).concat(customSubs.filter((c) => c.group === g.id).map((c) => ({ id: c.id, ar: c.ar, custom: true }))) }));
   }
   const subName = (id) => { for (const g of expTree()) for (const s of g.subs) if (s.id === id) return s.ar; return "—"; };
   const fmtDH = (n) => { const v = Math.round((Number(n) || 0) * 100) / 100; const [i, d] = v.toFixed(2).split("."); return "\u2066" + i.replace(/\B(?=(\d{3})+(?!\d))/g, "\u202F") + (d !== "00" ? "," + d : "") + "\u2069"; };
@@ -1302,6 +1337,21 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     sel.innerHTML = expTree().map((g) => `<optgroup label="${esc(g.ar)}">${g.subs.map((s) => `<option value="${s.id}">${esc(s.ar)}</option>`).join("")}</optgroup>`).join("");
     if (value) sel.value = value;
   }
+  function showChosen() {
+    const id = $("#x-sub").value, g = expTree().find((gg) => gg.subs.some((s) => s.id === id));
+    const el = $("#x-sub-show");
+    if (!g) { el.className = "sub-chosen none"; el.textContent = "👇 اختر الفئة من الخانات أسفله"; el.style.removeProperty("--gc"); $("#x-save").disabled = true; return; }
+    el.className = "sub-chosen"; el.style.setProperty("--gc", g.col);
+    el.innerHTML = `${g.ic || ""} <span class="g">${esc(g.ar)} ›</span> ${esc(subName(id))}`; $("#x-save").disabled = false;
+  }
+  function pickSub(id, scroll) {
+    if (!expTree().some((g) => g.subs.some((s) => s.id === id))) return;
+    $("#x-sub").value = id; store.set("exp-last-sub", id);
+    if (!$("#x-bname").dataset.touched) $("#x-bname").value = subName(id);
+    showChosen(); renderAgain(); $$("#x-groups .sub").forEach((s) => s.classList.toggle("picked", s.dataset.sub === id));
+    if (scroll) { $("#x-panel").scrollIntoView({ behavior: "smooth", block: "start" }); $("#x-amount").focus({ preventScroll: true }); }
+  }
+  $("#x-sub-show").addEventListener("click", () => document.getElementById("x-groups").scrollIntoView({ behavior: "smooth", block: "start" }));
   function renderAgain() {
     const sub = $("#x-sub").value, seen = new Set(), amounts = [];
     [...expenses].filter((e) => e.sub === sub).sort((a, b) => (a.date < b.date ? 1 : -1)).forEach((e) => { if (!seen.has(e.amount) && amounts.length < 6) { seen.add(e.amount); amounts.push(e.amount); } });
@@ -1323,10 +1373,39 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     return true;
   }
   $("#x-sub").addEventListener("change", () => { store.set("exp-last-sub", $("#x-sub").value); renderAgain(); });
+  function syncRecBox() {
+    const on = $("#x-rec").checked; $("#x-rec-box").hidden = !on;
+    const m = $("#x-freq").value === "monthly"; $("#x-day-l").hidden = !m; $("#x-due-l").hidden = m;
+    $("#x-save").textContent = on ? "حفظ الالتزام" : "إضافة";
+    if (on && !$("#x-bname").dataset.touched) $("#x-bname").value = subName($("#x-sub").value);
+    if (on && !$("#x-due").value) $("#x-due").value = today();
+  }
+  $("#x-rec").addEventListener("change", syncRecBox);
+  $("#x-freq").addEventListener("change", syncRecBox);
+  $("#x-bname").addEventListener("input", () => { $("#x-bname").dataset.touched = "1"; });
+  $("#x-sub").addEventListener("change", () => { if (!$("#x-bname").dataset.touched) $("#x-bname").value = subName($("#x-sub").value); });
   $("#x-form").addEventListener("submit", (e) => {
     e.preventDefault();
-    const ok = addExpense({ date: $("#x-date").value, sub: $("#x-sub").value, item: subName($("#x-sub").value), amount: C.parseAmount($("#x-amount").value), note: $("#x-note").value.trim() });
-    if (ok) { $("#x-amount").value = ""; $("#x-note").value = ""; }
+    const sub = $("#x-sub").value, amount = C.parseAmount($("#x-amount").value);
+    if (!$("#x-rec").checked) {
+      const ok = addExpense({ date: $("#x-date").value, sub, item: subName(sub), amount, note: $("#x-note").value.trim() });
+      if (ok) { $("#x-amount").value = ""; $("#x-note").value = ""; }
+      return;
+    }
+    const freq = $("#x-freq").value;
+    const bill = { id: newId(), name: $("#x-bname").value.trim() || subName(sub), amount, freq, day: freq === "monthly" ? parseInt($("#x-day").value, 10) : undefined, date: freq !== "monthly" ? $("#x-due").value : undefined, margin: parseInt($("#x-margin").value, 10), sub, since: today(), paid: [] };
+    const v = C.validateBill(bill);
+    if (!v.ok) { $("#x-errs").innerHTML = v.errors.map((t) => `<li>${t}</li>`).join(""); return; }
+    $("#x-errs").innerHTML = "";
+    if ($("#x-paidnow").checked) {
+      const d = C.billDue(bill, today()); bill.paid.push(d.period);
+      expenses.push({ id: newId(), date: today(), sub, item: bill.name, amount, note: "التزام · " + (d.period === "once" ? fmtDate(d.due) : d.period) }); saveExp();
+    }
+    bills.push(bill); saveBills(); lnInit(); renderBills(); renderExp(); renderHomeExp();
+    $("#x-rec").checked = false; $("#x-paidnow").checked = false; $("#x-amount").value = ""; $("#x-note").value = ""; $("#x-bname").dataset.touched = ""; syncRecBox();
+    const nd = C.billDue(bill, today());
+    $("#savestate").textContent = `حُفظ الالتزام · الاستحقاق ${fmtDate(nd.due)} ✓`;
+    document.getElementById("bills-sec").scrollIntoView({ behavior: "smooth", block: "start" });
   });
   $("#m-prev").addEventListener("click", () => { xMonth = C.addMonths(xMonth, -1); renderExp(); });
   $("#m-next").addEventListener("click", () => { xMonth = C.addMonths(xMonth, 1); renderExp(); });
@@ -1354,12 +1433,12 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       const subsHtml = g.subs.map((sb) => {
         const st = s.bySub[sb.id];
         const list = expenses.filter((e) => e.sub === sb.id && C.monthOf(e.date) === xMonth).sort((a, b) => (a.date < b.date ? 1 : -1));
-        return `<div class="sub"><div class="sub-h"><span>${esc(sb.ar)}${sb.custom ? ` <span class="pill n">خاصة</span>` : ""} <button class="x-del" data-delsub="${sb.id}" title="حذف الفئة" aria-label="حذف الفئة ${esc(sb.ar)}">🗑</button></span><span><span class="amt">${st ? fmtDH(st.sum) : "0"}</span> <span class="dh">درهم${st ? " · " + st.count + "×" : ""}</span>
+        return `<div class="sub ${$("#x-sub").value === sb.id ? "picked" : ""}" data-sub="${sb.id}"><div class="sub-h"><span class="sub-pick" data-pick="${sb.id}" role="button" tabindex="0"><b>${esc(sb.ar)}</b>${sb.custom ? ` <span class="pill n">خاصة</span>` : ""} <button class="x-del" data-delsub="${sb.id}" title="حذف الفئة" aria-label="حذف الفئة ${esc(sb.ar)}">🗑</button></span><span><span class="amt">${st ? fmtDH(st.sum) : "0"}</span> <span class="dh">درهم${st ? " · " + st.count + "×" : ""}</span>
           <button class="btn" data-bell="${sb.id}" style="padding:2px 8px;margin-inline-start:6px" title="تنبيه بالاستحقاق" aria-label="تنبيه بالاستحقاق">🔔${bills.some((x) => x.sub === sb.id) ? "✓" : ""}</button><button class="btn" data-quick="${sb.id}" style="padding:2px 8px;margin-inline-start:4px" aria-label="إضافة مصروف">+</button></span></div>
           ${list.length ? `<div class="sub-list">${list.map((e) => `<div><span class="dt">${e.date.slice(8)}/${e.date.slice(5, 7)}</span><span>${e.note ? esc(e.note) : (e.item && e.item !== sb.ar ? esc(e.item) : `<span class="lbl">—</span>`)}</span><span class="a">${fmtDH(e.amount)}</span><button class="x-del" data-del="${e.id}" aria-label="حذف">×</button></div>`).join("")}</div>` : ""}
         </div>`;
       }).join("");
-      return `<details class="grp" data-g="${g.id}" ${openGroups.has(g.id) ? "open" : ""}><summary><span class="nm">${esc(g.ar)}</span><span><span class="amt">${fmtDH(gt)}</span> <span class="dh">درهم</span></span><span class="bar"><i style="width:${(gt / max) * 100}%;background:${g.col}"></i></span></summary>
+      return `<details class="grp" data-g="${g.id}" style="--gc:${g.col}" ${openGroups.has(g.id) ? "open" : ""}><summary><span class="ic">${g.ic || "•"}</span><span class="nm">${esc(g.ar)}</span><span class="amt-l"><span class="amt">${fmtDH(gt)}</span><span class="dh">درهم</span></span><span class="bar"><i style="width:${(gt / max) * 100}%;background:${g.col}"></i></span></summary>
         <div class="subs">${subsHtml}<form class="add-sub" data-addsub="${g.id}"><input type="text" placeholder="فئة جديدة في «${esc(g.ar)}»" maxlength="40" aria-label="فئة جديدة"><button class="btn" type="submit">إضافة فئة</button></form></div></details>`;
     }).join("");
     $$("#x-groups details.grp").forEach((d) => d.addEventListener("toggle", () => { d.open ? openGroups.add(d.dataset.g) : openGroups.delete(d.dataset.g); store.set("exp-open", JSON.stringify([...openGroups])); }));
@@ -1373,18 +1452,17 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       if (customSubs.some((c) => c.id === id)) { customSubs = customSubs.filter((c) => c.id !== id); store.set("exp-custom", JSON.stringify(customSubs)); }
       else { hiddenSubs.push(id); store.set("exp-hidden", JSON.stringify(hiddenSubs)); }
       expenses = expenses.filter((e) => e.sub !== id); saveExp();
-      const keep = $("#x-sub").value; fillSubSelect($("#x-sub"), keep === id ? "" : keep); fillSubSelect($("#b-sub"), $("#b-sub").value); renderAgain(); renderExp(); renderHomeExp();
+      const keep = $("#x-sub").value; fillSubSelect($("#x-sub"), keep === id ? "" : keep); if (keep === id) $("#x-sub").value = ""; showChosen(); fillSubSelect($("#b-sub"), $("#b-sub").value); renderAgain(); renderExp(); renderHomeExp();
     }));
     $$("#x-groups [data-bell]").forEach((b) => b.addEventListener("click", () => {
       const sid = b.dataset.bell, ex = bills.find((x) => x.sub === sid);
-      if (ex) openBill(ex.id);
-      else { openBill(null); $("#b-name").value = subName(sid); fillSubSelect($("#b-sub"), sid); const last = [...expenses].filter((e) => e.sub === sid).sort((a, c) => (a.date < c.date ? 1 : -1))[0]; if (last) $("#b-amount").value = String(last.amount).replace(".", ","); }
-      $("#b-panel").scrollIntoView({ behavior: "smooth", block: "start" }); $("#b-amount").focus({ preventScroll: true });
-    }));
-    $$("#x-groups [data-quick]").forEach((b) => b.addEventListener("click", () => {
-      $("#x-sub").value = b.dataset.quick; store.set("exp-last-sub", b.dataset.quick); renderAgain();
+      if (ex) { openBill(ex.id); return; }
+      pickSub(sid); $("#x-rec").checked = true; $("#x-bname").dataset.touched = ""; syncRecBox();
+      const last = [...expenses].filter((e) => e.sub === sid).sort((a, c) => (a.date < c.date ? 1 : -1))[0]; if (last) $("#x-amount").value = String(last.amount).replace(".", ",");
       $("#x-panel").scrollIntoView({ behavior: "smooth", block: "start" }); $("#x-amount").focus({ preventScroll: true });
     }));
+    $$("#x-groups [data-quick]").forEach((b) => b.addEventListener("click", () => pickSub(b.dataset.quick, true)));
+    $$("#x-groups [data-pick]").forEach((b) => { b.addEventListener("click", (e) => { if (e.target.closest("[data-delsub]")) return; pickSub(b.dataset.pick, true); }); b.addEventListener("keydown", (e) => { if (e.key === "Enter") pickSub(b.dataset.pick, true); }); });
     $$("#x-groups [data-addsub]").forEach((f) => f.addEventListener("submit", (e) => {
       e.preventDefault(); const name = f.querySelector("input").value.trim(); if (!name) return;
       const base = EXP_TREE_BASE.find((g) => g.id === f.dataset.addsub).subs.find(([id, ar]) => ar === name && hiddenSubs.includes(id));
@@ -1444,6 +1522,14 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
       <td>${d.status !== "paid" ? `<button class="btn pri" data-pay="${b.id}">تم الأداء</button>` : ""}</td></tr>`).join("")
       : `<tr><td colspan="5" class="empty">لا توجد التزامات بعد. أضف الكراء أو التأمين أو الاشتراكات من النموذج أدناه.</td></tr>`;
     $$("#b-table tr.click").forEach((tr) => tr.addEventListener("click", () => openBill(tr.dataset.id)));
+    const dmy = (k) => `${k.slice(8)}/${k.slice(5, 7)}`;
+    $("#b-cards").innerHTML = rows.length ? rows.map(({ b, d }) => `<div class="due-row click ${d.status === "overdue" ? "late" : d.status === "soon" ? "soon" : ""} ${bEditing === b.id ? "sel-row" : ""}" data-id="${b.id}">
+      <span class="t">${esc(b.name)} <span class="due-date">${dmy(d.due)}</span></span>
+      <span class="r"><span class="a">${fmtDH(b.amount)} DH</span>${d.status !== "paid" ? `<button class="btn pri" data-pay="${b.id}">تم الأداء</button>` : ""}</span>
+      <span class="s">${dueText(d)} · ${FREQ_AR[b.freq]} · تنبيه قبل ${b.margin} يوم</span></div>`).join("")
+      : `<p class="empty">لا توجد التزامات بعد. فعّل «🔔 التزام متكرر» في نموذج «إضافة مصروف» أو اضغط 🔔 في أي فئة.</p>`;
+    $$("#b-cards .due-row").forEach((r) => r.addEventListener("click", () => openBill(r.dataset.id)));
+    $$("#b-cards [data-pay]").forEach((btn) => btn.addEventListener("click", (e) => { e.stopPropagation(); payBill(btn.dataset.pay); }));
     $$("#b-table [data-pay]").forEach((btn) => btn.addEventListener("click", (e) => { e.stopPropagation(); payBill(btn.dataset.pay); }));
     // dashboard
     const open = rows.filter((r) => r.d.status === "overdue" || r.d.status === "soon");
@@ -1463,10 +1549,18 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     $("#b-freq").value = b ? b.freq : "monthly"; $("#b-day").value = b && b.day ? b.day : 1; $("#b-date").value = b && b.date ? b.date : today();
     $("#b-margin").value = b ? b.margin : 3; fillSubSelect($("#b-sub"), b ? b.sub : "rent");
     $("#b-save").textContent = b ? "حفظ التعديلات" : "إضافة"; $("#b-del").hidden = !b; $("#b-del").dataset.confirm = ""; $("#b-del").textContent = "حذف"; $("#b-errs").innerHTML = "";
+    $("#b-panel").hidden = !b; $("#b-unpay").hidden = !(b && (b.paid || []).length);
     syncBillForm(); renderBills();
     if (b) $("#b-panel").scrollIntoView({ behavior: "smooth", block: "start" });
   }
   $("#b-cancel").addEventListener("click", () => openBill(null));
+  $("#b-unpay").addEventListener("click", () => {
+    const b = bills.find((x) => x.id === bEditing); if (!b || !(b.paid || []).length) return;
+    const last = b.paid[b.paid.length - 1]; b.paid = b.paid.slice(0, -1);
+    const i = expenses.map((e) => e.item === b.name && (e.note || "").endsWith(last)).lastIndexOf(true);
+    if (i >= 0) { expenses.splice(i, 1); saveExp(); }
+    saveBills(); openBill(b.id); renderExp(); renderHomeExp(); $("#savestate").textContent = "أُلغي آخر أداء ✓";
+  });
   $("#b-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const freq = $("#b-freq").value;
@@ -1508,7 +1602,7 @@ input[type=date], input[type=time] { min-width: 0; width: 100%; }
     await loadDay(today()); await openDay(cur);
     renderHome(); renderWeek(); renderMin(); renderSup(); renderCmp(); checkAlarms();
     renderMeals(); openMed(null); renderHomeRoutine();
-    fillSubSelect($("#x-sub"), store.get("exp-last-sub") || "veg"); $("#x-date").value = today(); renderAgain(); renderExp(); renderHomeExp(); openBill(null);
+    fillSubSelect($("#x-sub"), store.get("exp-last-sub") || ""); if (!store.get("exp-last-sub")) $("#x-sub").value = ""; showChosen(); $("#x-date").value = today(); renderAgain(); renderExp(); renderHomeExp(); openBill(null);
     if (NATIVE) {
       $("#alarm-note").textContent = "يرنّ المنبه في الهاتف عند ساعة البداية حتى لو كان التطبيق مغلقًا. في المرة الأولى سيطلب منك التطبيق إذن الإشعارات.";
       $$(".kpi .d").forEach((d) => { if (d.textContent.includes("مفتوحة")) d.textContent = "ترنّ حتى لو كان التطبيق مغلقًا"; });
