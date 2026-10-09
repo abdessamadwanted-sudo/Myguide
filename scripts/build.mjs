@@ -1,5 +1,5 @@
 // Assemble www/index.html from src/ (page + logique + données), sans bundler.
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
 
 const src = (f) => readFileSync(new URL("../src/" + f, import.meta.url), "utf8");
 const body = src("page.html")
@@ -22,4 +22,5 @@ ${body}
 `;
 mkdirSync(new URL("../www/", import.meta.url), { recursive: true });
 writeFileSync(new URL("../www/index.html", import.meta.url), html);
+cpSync(new URL("../sounds/", import.meta.url), new URL("../www/sounds/", import.meta.url), { recursive: true });
 console.log("www/index.html:", (html.length / 1024).toFixed(1), "KB");

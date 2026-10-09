@@ -132,19 +132,10 @@ td.best { color: var(--accent); font-weight: 600; }
 /* Calendar */
 .cal { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; }
 @media (max-width: 900px) { .cal { grid-template-columns: minmax(0, 1fr); } }
-.timeline { position: relative; margin-inline-start: 56px; border-inline-start: 1px solid var(--line); }
-.tl-hour { position: absolute; inset-inline: 0; border-top: 1px solid var(--line); }
-.tl-hour span { position: absolute; right: -56px; top: -8px; width: 48px; text-align: end; font-family: var(--mono); font-size: .72rem; color: var(--faint); direction: ltr; }
-.tl-now { position: absolute; inset-inline: 0; border-top: 2px solid var(--bad); z-index: 2; }
-.tl-now::before { content: ""; position: absolute; inset-inline-start: -5px; top: -5px; width: 8px; height: 8px; border-radius: 50%; background: var(--bad); }
-.ev { position: absolute; inset-inline: 6px; border-radius: 6px; padding: 4px 8px; background: var(--panel-2); border-inline-start: 3px solid var(--accent); overflow: hidden; cursor: pointer; display: flex; gap: 8px; align-items: flex-start; font-size: .8rem; border: 1px solid var(--line-2); border-inline-start-width: 3px; }
-.ev:hover { border-color: var(--muted); }
-.ev.sel { box-shadow: 0 0 0 2px var(--accent); }
-.ev.clash { background: repeating-linear-gradient(135deg, var(--panel-2), var(--panel-2) 6px, rgba(251,113,133,.08) 6px, rgba(251,113,133,.08) 12px); }
-.ev b { font-weight: 500; }
-.ev .t { font-family: var(--mono); color: var(--muted); font-size: .72rem; direction: ltr; white-space: nowrap; }
-.ev .bell { margin-inline-start: auto; color: var(--c3); }
 .form { display: grid; gap: 10px; }
+.tone-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
+.tone-row[aria-disabled="true"] { opacity: .45; }
+.tone-name { display: block; font-size: .7rem; color: var(--muted); margin-top: 2px; }
 .form label { display: grid; gap: 4px; font-size: .78rem; color: var(--muted); }
 .form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .form input, .form select { width: 100%; }
@@ -200,13 +191,11 @@ td.best { color: var(--accent); font-weight: 600; }
       <div class="kpi"><span class="lbl">المعطيات</span><span class="v">21</span><span class="d">13 معدن · 8 مكملات</span></div>
     </div>
     <div class="grid2">
-      <div class="panel"><header><h2>ساعات الأسبوع حسب الفئة</h2><span class="lbl" id="wk-range"></span></header>
+      <div class="panel"><header><h2>الوقت المخطط فالأسبوع</h2><span class="lbl" id="wk-range"></span></header>
         <div class="body"><div class="chart" id="wk-chart"></div><div class="legend" id="wk-legend"></div></div></div>
       <div class="panel"><header><h2>برنامج اليوم</h2><button class="btn" data-go="cal">فتح الأجندة</button></header>
-        <div class="body flush tw"><table><thead><tr><th>الوقت</th><th>النشاط</th><th>الفئة</th><th>منبه</th></tr></thead><tbody id="home-today"></tbody></table></div></div>
+        <div class="body flush tw"><table><thead><tr><th>الوقت</th><th>النشاط</th><th>منبه</th></tr></thead><tbody id="home-today"></tbody></table></div></div>
     </div>
-    <div class="panel"><header><h2>المعادن: الحاجة اليومية والمصادر</h2><button class="btn" data-go="min">الجدول الكامل</button></header>
-      <div class="body flush tw"><table><thead><tr><th>المعدن</th><th>الحاجة اليومية (بالغ)</th><th>أهم المصادر</th><th>علامة النقص الأولى</th></tr></thead><tbody id="home-min"></tbody></table></div></div>
     <p class="note">القيم عند البالغين حسب NIH. المنتوجات والأثمنة فصفحة المقارنة خيالية (EXEMPLE).</p>
   </section>
 
@@ -230,8 +219,8 @@ td.best { color: var(--accent); font-weight: 600; }
       <div class="kpi"><span class="lbl">تداخل فالوقت</span><span class="v" id="c-clash">0</span></div>
     </div>
     <div class="cal">
-      <div class="panel"><header><h2>الخط الزمني</h2><span class="lbl">ضغط على أي ساعة باش تزيد موعد</span></header>
-        <div class="body"><div class="timeline" id="timeline"></div></div></div>
+      <div class="panel"><header><h2>جدول المواعيد</h2><span class="lbl" id="tbl-sum"></span></header>
+        <div class="body flush tw"><table><thead><tr><th>من</th><th>حتى</th><th>المدة</th><th>النشاط</th><th>منبه</th><th></th></tr></thead><tbody id="ev-table"></tbody></table></div></div>
       <div class="panel" id="ev-panel"><header><h2 id="ev-title">موعد جديد</h2></header>
         <div class="body">
           <form class="form" id="ev-form" novalidate>
@@ -240,8 +229,11 @@ td.best { color: var(--accent); font-weight: 600; }
               <label>البداية<input type="time" id="f-start" value="08:00"></label>
               <label>النهاية<input type="time" id="f-end" value="09:00"></label>
             </div>
-            <label>الفئة<select id="f-cat"></select></label>
             <label class="switch"><span>منبه فساعة البداية</span><input type="checkbox" id="f-alarm"><span class="tr"></span></label>
+            <div class="tone-row" id="tone-row">
+              <label>النغمة<select id="f-tone"></select></label>
+              <button type="button" class="btn" id="f-play" aria-label="سمع النغمة">▶ سمع</button>
+            </div>
             <label>ملاحظة<textarea id="f-note" placeholder="اختياري"></textarea></label>
             <ul class="errs" id="f-errs"></ul>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -252,8 +244,6 @@ td.best { color: var(--accent); font-weight: 600; }
           </form>
         </div></div>
     </div>
-    <div class="panel"><header><h2>جدول المواعيد</h2><span class="lbl" id="tbl-sum"></span></header>
-      <div class="body flush tw"><table><thead><tr><th>من</th><th>حتى</th><th>المدة</th><th>النشاط</th><th>الفئة</th><th>منبه</th><th></th></tr></thead><tbody id="ev-table"></tbody></table></div></div>
     <p class="note" id="alarm-note">المنبه كيرن وكيبان فوق ملي هاد الصفحة محلولة. فتطبيق Android كيرن حتى والتطبيق مسدود.</p>
   </section>
 
@@ -307,13 +297,13 @@ td.best { color: var(--accent); font-weight: 600; }
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
   const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
   const MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "ماي", "يونيو", "يوليوز", "غشت", "شتنبر", "أكتوبر", "نونبر", "دجنبر"];
-  const CATS = [
-    { id: "sport", ar: "تدريب", c: "var(--c1)" }, { id: "travail", ar: "خدمة", c: "var(--c2)" },
-    { id: "repas", ar: "ماكلة", c: "var(--c3)" }, { id: "etude", ar: "تعلم", c: "var(--c4)" },
-    { id: "repos", ar: "راحة", c: "var(--c5)" }, { id: "perso", ar: "شخصي", c: "var(--c6)" },
+  // Ringtones: files in www/sounds (preview) and android res/raw (real alarm). "default" = phone's own notification sound.
+  const TONES = [
+    { id: "classic", ar: "كلاسيكي" }, { id: "bell", ar: "جرس" }, { id: "soft", ar: "هادئ" },
+    { id: "digital", ar: "رقمي" }, { id: "rise", ar: "تصاعدي" }, { id: "default", ar: "نغمة التيليفون" },
   ];
-  const CAT = Object.fromEntries(CATS.map((c) => [c.id, c]));
-  const catPill = (id) => CAT[id] ? `<span class="pill" style="background:color-mix(in srgb, ${CAT[id].c} 16%, transparent);color:${CAT[id].c}">${CAT[id].ar}</span>` : `<span class="pill n">—</span>`;
+  const TONE = Object.fromEntries(TONES.map((t) => [t.id, t]));
+  const toneOf = (e) => (e && TONE[e.tone] ? e.tone : "classic");
   const parseKey = (k) => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
   const fmtDay = (k) => { const d = parseKey(k); return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
   const fmtDur = (min) => min >= 60 ? `${Math.floor(min / 60)}س${min % 60 ? " " + (min % 60) + "د" : ""}` : `${min}د`;
@@ -374,7 +364,8 @@ td.best { color: var(--accent); font-weight: 600; }
         let p = await LN.checkPermissions();
         if (p.display !== "granted") p = await LN.requestPermissions();
         if (p.display !== "granted") { $("#savestate").textContent = "المنبهات محبوسة: فعل Notifications فالإعدادات"; return false; }
-        try { await LN.createChannel({ id: "alarms", name: "المنبهات", description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80" }); } catch (e) {}
+        try { await LN.createChannel({ id: "alarms", name: "المنبهات · نغمة التيليفون", description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80" }); } catch (e) {}
+        for (const t of TONES) if (t.id !== "default") { try { await LN.createChannel({ id: "alarm_" + t.id, name: "المنبهات · " + t.ar, description: "منبهات الأجندة", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#4ADE80", sound: "tone_" + t.id + ".wav" }); } catch (e) {} }
         return true;
       } catch (e) { return false; }
     })();
@@ -393,7 +384,7 @@ td.best { color: var(--accent); font-weight: 600; }
       const base = parseKey(k), now = Date.now();
       const items = list.filter((e) => e.alarm && C.toMin(e.start) !== null).map((e) => {
         const at = new Date(base.getFullYear(), base.getMonth(), base.getDate(), 0, C.toMin(e.start));
-        return { id: nid(k, e.id), title: `⏰ ${e.start} · ${e.title}`, body: `حتى ${e.end}${e.note ? " — " + e.note : ""}`, channelId: "alarms", schedule: { at, allowWhileIdle: true }, extra: { day: k, ev: e.id } };
+        return { id: nid(k, e.id), title: `⏰ ${e.start} · ${e.title}`, body: `حتى ${e.end}${e.note ? " — " + e.note : ""}`, channelId: toneOf(e) === "default" ? "alarms" : "alarm_" + toneOf(e), schedule: { at, allowWhileIdle: true }, extra: { day: k, ev: e.id } };
       }).filter((n) => n.schedule.at.getTime() > now);
       if (items.length) await LN.schedule({ notifications: items });
     } catch (e) { $("#savestate").textContent = "ما قدرتش نبرمج المنبه"; }
@@ -404,8 +395,11 @@ td.best { color: var(--accent); font-weight: 600; }
   }
 
   // ---------- Calendar UI
-  CATS.forEach((c) => { const o = document.createElement("option"); o.value = c.id; o.textContent = c.ar; $("#f-cat").appendChild(o); });
-  const HPX = 52;
+  TONES.forEach((t) => { const o = document.createElement("option"); o.value = t.id; o.textContent = t.ar; $("#f-tone").appendChild(o); });
+  const syncToneRow = () => $("#tone-row").setAttribute("aria-disabled", String(!$("#f-alarm").checked));
+  $("#f-alarm").addEventListener("change", syncToneRow);
+  $("#f-play").addEventListener("click", () => playTone($("#f-tone").value));
+  $("#f-tone").addEventListener("change", () => playTone($("#f-tone").value));
   function renderCal() {
     const ev = C.sortEvents(days[cur] || []);
     const clash = C.findOverlaps(ev);
@@ -417,32 +411,12 @@ td.best { color: var(--accent); font-weight: 600; }
     $("#c-alarms").textContent = sum.alarms;
     $("#c-clash").innerHTML = clash.size ? `<span style="color:var(--bad)">${clash.size}</span>` : "0";
     $("#tbl-sum").textContent = `${sum.count} موعد · ${fmtDur(sum.minutes)}`;
-    // timeline range
-    let from = 5, to = 24;
-    ev.forEach((e) => { from = Math.min(from, Math.floor(C.toMin(e.start) / 60)); to = Math.max(to, Math.ceil(C.toMin(e.end) / 60)); });
-    to = Math.min(to, 24);
-    const tl = $("#timeline");
-    tl.style.height = (to - from) * HPX + "px";
-    let html = "";
-    for (let h = from; h < to; h++) html += `<div class="tl-hour" style="top:${(h - from) * HPX}px;height:${HPX}px" data-h="${h}"><span>${String(h).padStart(2, "0")}:00</span></div>`;
-    if (cur === today()) { const n = nowMin(); if (n >= from * 60 && n < to * 60) html += `<div class="tl-now" style="top:${((n - from * 60) / 60) * HPX}px"></div>`; }
-    html += ev.map((e) => {
-      const top = ((C.toMin(e.start) - from * 60) / 60) * HPX, h = Math.max(22, (C.duration(e) / 60) * HPX - 2);
-      const c = CAT[e.cat] ? CAT[e.cat].c : "var(--faint)";
-      return `<div class="ev ${editing === e.id ? "sel" : ""} ${clash.has(e.id) ? "clash" : ""}" data-id="${e.id}" style="top:${top}px;height:${h}px;border-inline-start-color:${c}">
-        <span class="t">${e.start}–${e.end}</span><b>${esc(e.title)}</b>${e.alarm ? `<span class="bell" title="منبه">⏰</span>` : ""}</div>`;
-    }).join("");
-    tl.innerHTML = html;
-    $$("#timeline .ev").forEach((el) => el.addEventListener("click", (x) => { x.stopPropagation(); openForm(el.dataset.id); }));
-    $$("#timeline .tl-hour").forEach((el) => el.addEventListener("click", () => { const h = Number(el.dataset.h); openForm(null, C.fromMin(h * 60), C.fromMin(Math.min(h * 60 + 60, 23 * 60 + 59))); }));
-    // table
     $("#ev-table").innerHTML = ev.length ? ev.map((e) => `<tr class="click ${editing === e.id ? "sel" : ""}" data-id="${e.id}">
       <td class="n">${e.start}</td><td class="n">${e.end}</td><td class="n">${fmtDur(C.duration(e))}</td>
       <td>${esc(e.title)}${clash.has(e.id) ? ` <span class="pill r">تداخل</span>` : ""}${e.note ? `<div class="lbl">${esc(e.note)}</div>` : ""}</td>
-      <td>${catPill(e.cat)}</td>
-      <td><label class="switch mini-sw" onclick="event.stopPropagation()"><input type="checkbox" id="al-${e.id}" data-al="${e.id}" ${e.alarm ? "checked" : ""} aria-label="منبه"><span class="tr"></span></label></td>
+      <td><label class="switch mini-sw" onclick="event.stopPropagation()"><input type="checkbox" id="al-${e.id}" data-al="${e.id}" ${e.alarm ? "checked" : ""} aria-label="منبه"><span class="tr"></span></label>${e.alarm ? `<span class="tone-name">${TONE[toneOf(e)].ar}</span>` : ""}</td>
       <td><button class="btn" data-edit="${e.id}">تعديل</button></td></tr>`).join("")
-      : `<tr><td colspan="7" class="empty">ما كاين حتى موعد فهاد النهار. ضغط «+ موعد جديد» أو على شي ساعة فالخط الزمني.</td></tr>`;
+      : `<tr><td colspan="6" class="empty">ما كاين حتى موعد فهاد النهار. عمر الفورمولير وضغط «زيد».</td></tr>`;
     $$("#ev-table tr.click").forEach((tr) => tr.addEventListener("click", () => openForm(tr.dataset.id)));
     $$("#ev-table [data-al]").forEach((i) => i.addEventListener("change", () => {
       const e = days[cur].find((x) => x.id === i.dataset.al); if (!e) return;
@@ -450,15 +424,16 @@ td.best { color: var(--accent); font-weight: 600; }
       persist(cur); renderCal(); renderHome();
     }));
   }
-  function openForm(id, start, end) {
+  function openForm(id) {
     const e = id ? (days[cur] || []).find((x) => x.id === id) : null;
     editing = e ? e.id : null;
     $("#ev-title").textContent = e ? "تعديل الموعد" : "موعد جديد";
     $("#f-title").value = e ? e.title : "";
-    $("#f-start").value = e ? e.start : (start || "08:00");
-    $("#f-end").value = e ? e.end : (end || "09:00");
-    $("#f-cat").value = e ? (e.cat || "sport") : "sport";
+    $("#f-start").value = e ? e.start : "08:00";
+    $("#f-end").value = e ? e.end : "09:00";
     $("#f-alarm").checked = e ? !!e.alarm : false;
+    $("#f-tone").value = e ? toneOf(e) : (store.get("last-tone") || "classic");
+    syncToneRow();
     $("#f-note").value = e ? (e.note || "") : "";
     $("#f-save").textContent = e ? "حفظ التعديل" : "زيد";
     $("#f-del").hidden = !e; $("#f-errs").innerHTML = "";
@@ -470,10 +445,10 @@ td.best { color: var(--accent); font-weight: 600; }
   $("#f-cancel").addEventListener("click", () => { editing = null; openForm(null); });
   $("#ev-form").addEventListener("submit", (x) => {
     x.preventDefault();
-    const data = { title: $("#f-title").value.trim(), start: $("#f-start").value, end: $("#f-end").value, cat: $("#f-cat").value, alarm: $("#f-alarm").checked, note: $("#f-note").value.trim() };
+    const data = { title: $("#f-title").value.trim(), start: $("#f-start").value, end: $("#f-end").value, alarm: $("#f-alarm").checked, tone: $("#f-tone").value, note: $("#f-note").value.trim() };
     const v = C.validateEvent(data);
     if (!v.ok) { $("#f-errs").innerHTML = v.errors.map((t) => `<li>${t}</li>`).join(""); return; }
-    if (data.alarm) { primeAudio(); lnInit(); }
+    if (data.alarm) { primeAudio(); lnInit(); store.set("last-tone", data.tone); }
     const list = days[cur] = days[cur] || [];
     if (editing) { const e = list.find((y) => y.id === editing); Object.assign(e, data); fired.delete(e.id + "@" + e.start); }
     else list.push({ id: "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), ...data });
@@ -507,10 +482,16 @@ td.best { color: var(--accent); font-weight: 600; }
     try { [0, .35, .7].forEach((t) => { const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(actx.destination); g.gain.setValueAtTime(.0001, actx.currentTime + t); g.gain.exponentialRampToValueAtTime(.25, actx.currentTime + t + .02); g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + t + .28); o.start(actx.currentTime + t); o.stop(actx.currentTime + t + .3); }); } catch (e) {}
   }
   document.addEventListener("pointerdown", primeAudio, { once: true });
+  let toneAudio = null;
+  function playTone(id) {
+    try { if (toneAudio) { toneAudio.pause(); toneAudio = null; } } catch (e) {}
+    if (id === "default") { primeAudio(); beep(); return; }
+    try { toneAudio = new Audio("sounds/tone_" + id + ".wav"); toneAudio.play().catch(() => { primeAudio(); beep(); }); } catch (e) { primeAudio(); beep(); }
+  }
   function checkAlarms() {
     const list = days[today()] || [];
     C.dueAlarms(list, nowMin(), fired).forEach((e) => {
-      fired.add(e.id + "@" + e.start); beep();
+      fired.add(e.id + "@" + e.start); if (!NATIVE) playTone(toneOf(e));
       const t = $("#toast");
       t.innerHTML = `<span style="font-size:1.4rem">⏰</span><div><b>${e.start}</b> · ${esc(e.title)}<div class="lbl">حتى ${e.end}</div></div><button class="btn" id="toast-x">مزيان</button>`;
       t.hidden = false; $("#toast-x").addEventListener("click", () => (t.hidden = true));
@@ -528,7 +509,7 @@ td.best { color: var(--accent); font-weight: 600; }
     $("#k-hours-m").style.width = Math.min(100, (sum.minutes / 960) * 100) + "%";
     $("#k-alarms").textContent = sum.alarms;
     $("#nb-cal").textContent = sum.count || "";
-    $("#home-today").innerHTML = ev.length ? ev.map((e) => `<tr><td class="n">${e.start}–${e.end}</td><td>${esc(e.title)}</td><td>${catPill(e.cat)}</td><td>${e.alarm ? "⏰" : "—"}</td></tr>`).join("") : `<tr><td colspan="4" class="empty">ما كاين حتى موعد اليوم.</td></tr>`;
+    $("#home-today").innerHTML = ev.length ? ev.map((e) => `<tr><td class="n">${e.start}–${e.end}</td><td>${esc(e.title)}</td><td>${e.alarm ? "⏰" : "—"}</td></tr>`).join("") : `<tr><td colspan="3" class="empty">ما كاين حتى موعد اليوم.</td></tr>`;
   }
   async function renderWeek() {
     const d = parseKey(today()), start = C.addDays(today(), -d.getDay());
@@ -544,22 +525,16 @@ td.best { color: var(--accent); font-weight: 600; }
     let bars = "";
     keys.forEach((k, i) => {
       // LTR chart: x position goes left→right Sunday→Saturday
-      const x = pl + i * cw + (cw - bw) / 2; let acc = 0;
-      CATS.concat([{ id: "autre", c: "var(--faint)" }]).forEach((c) => {
-        const m = data[i].byCat[c.id] || 0; if (!m) return;
-        const h0 = acc / 60, h1 = (acc + m) / 60; acc += m;
-        bars += `<rect x="${x}" y="${y(h1)}" width="${bw}" height="${Math.max(0, y(h0) - y(h1))}" fill="${c.c}" rx="2"><title>${fmtDay(k)} · ${(c.ar || "أخرى")}: ${fmtDur(m)}</title></rect>`;
-      });
+      const x = pl + i * cw + (cw - bw) / 2, m = data[i].minutes;
+      if (m) bars += `<rect x="${x}" y="${y(m / 60)}" width="${bw}" height="${Math.max(0, y(0) - y(m / 60))}" fill="${k === today() ? "var(--accent)" : "var(--c2)"}" rx="2"><title>${fmtDay(k)}: ${fmtDur(m)}</title></rect>`;
       const dd = parseKey(k);
       bars += `<text x="${x + bw / 2}" y="${H - 8}" text-anchor="middle" ${k === today() ? 'style="fill:var(--accent)"' : ""}>${DAYS[dd.getDay()].replace("ال", "").slice(0, 3)} ${dd.getDate()}</text>`;
     });
     $("#wk-chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ساعات الأسبوع">${g}${bars}</svg>`;
-    $("#wk-legend").innerHTML = CATS.map((c) => `<span><i style="background:${c.c}"></i>${c.ar} <b class="num">${fmtDur(data.reduce((a, s) => a + (s.byCat[c.id] || 0), 0))}</b></span>`).join("");
+    const tot = data.reduce((a, s) => a + s.minutes, 0), days7 = data.filter((s) => s.minutes).length;
+    $("#wk-legend").innerHTML = `<span><i style="background:var(--c2)"></i>المجموع <b class="num">${fmtDur(tot)}</b></span><span>المعدل فالنهار <b class="num">${fmtDur(days7 ? Math.round(tot / days7) : 0)}</b></span><span><i style="background:var(--accent)"></i>اليوم</span>`;
     $("#wk-range").textContent = `${fmtDay(keys[0])} → ${fmtDay(keys[6])}`;
   }
-  $("#home-min").innerHTML = M.MINERALS.slice(0).sort((a, b) => ["fe", "mg", "zn", "ca", "k", "i"].indexOf(a.id) - ["fe", "mg", "zn", "ca", "k", "i"].indexOf(b.id)).filter((m) => ["fe", "mg", "zn", "ca", "k", "i"].includes(m.id)).map((m) => `<tr class="click" data-min="${m.id}">
-    <td><span class="sym ${m.group === "oligo" ? "o" : ""} lat">${m.sym}</span> ${esc(m.ar)}</td><td>${esc(m.need)}</td><td>${esc(m.sources.slice(0, 3).join("، "))}</td><td>${esc(m.deficiency[0])}</td></tr>`).join("");
-  $$("#home-min tr").forEach((tr) => tr.addEventListener("click", () => { go("min"); openMineral(tr.dataset.min); }));
 
   // ---------- Minerals
   let mg = "all", msel = null;
